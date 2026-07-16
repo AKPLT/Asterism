@@ -52,7 +52,6 @@
                         <GridViewColumn Header="名前" Width="140" DisplayMemberBinding="{Binding Name}" />
                         <GridViewColumn Header="バージョン" Width="80" DisplayMemberBinding="{Binding Version}" />
                         <GridViewColumn Header="カテゴリ" Width="100" DisplayMemberBinding="{Binding Category}" />
-                        <GridViewColumn Header="種別" Width="70" DisplayMemberBinding="{Binding PackageType}" />
                         <GridViewColumn Header="操作" Width="140">
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
