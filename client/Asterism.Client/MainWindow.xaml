@@ -11,6 +11,11 @@
         <MenuItem Header="ツール">
             <MenuItem Header="管理者モード" Click="OnAdminModeClick" />
         </MenuItem>
+        <MenuItem Header="ヘルプ">
+            <MenuItem Header="使い方" Click="OnHelpClick" />
+            <Separator />
+            <MenuItem Header="バージョン情報" Click="OnAboutClick" />
+        </MenuItem>
     </Menu>
     <Grid Margin="12">
         <Grid.RowDefinitions>

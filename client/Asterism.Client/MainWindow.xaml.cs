@@ -113,4 +113,16 @@ public partial class MainWindow : Window
             adminWindow.Show();
         }
     }
+
+    private void OnHelpClick(object sender, RoutedEventArgs e)
+    {
+        var win = new Views.HelpWindow { Owner = this };
+        win.Show();
+    }
+
+    private void OnAboutClick(object sender, RoutedEventArgs e)
+    {
+        var win = new Views.AboutWindow { Owner = this };
+        win.ShowDialog();
+    }
 }
