@@ -36,6 +36,13 @@ public partial class ToolCardViewModel : ObservableObject
 
     public bool IsUpdateAvailable => State == ToolCardState.UpdateAvailable;
     public string VersionText => Tool.Version;
+    public bool HasIcon => !string.IsNullOrEmpty(Tool.IconUrl);
+    public bool NoIcon => string.IsNullOrEmpty(Tool.IconUrl);
+    public string InitialLetter => string.IsNullOrEmpty(Tool.Name) ? "?" : Tool.Name[0].ToString().ToUpperInvariant();
+    public string InitialColor => _palette[Math.Abs((Tool.Name ?? "").GetHashCode()) % _palette.Length];
+
+    private static readonly string[] _palette =
+        ["#4F46E5", "#0284C7", "#059669", "#D97706", "#DC2626", "#7C3AED", "#DB2777", "#0891B2"];
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(PrimaryActionCommand))]
@@ -86,6 +93,10 @@ public partial class ToolCardViewModel : ObservableObject
         OnPropertyChanged(nameof(Tags));
         OnPropertyChanged(nameof(IconUrl));
         OnPropertyChanged(nameof(VersionText));
+        OnPropertyChanged(nameof(HasIcon));
+        OnPropertyChanged(nameof(NoIcon));
+        OnPropertyChanged(nameof(InitialLetter));
+        OnPropertyChanged(nameof(InitialColor));
         RefreshState();
     }
 

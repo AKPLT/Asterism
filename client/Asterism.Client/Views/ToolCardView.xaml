@@ -43,8 +43,18 @@
             <!-- 上部: アイコン・名前・バージョン・バッジ -->
             <StackPanel DockPanel.Dock="Top">
                 <StackPanel Orientation="Horizontal">
-                    <Image Source="{Binding IconUrl, Converter={StaticResource StringToImageSourceConverter}}"
-                           Width="40" Height="40" Margin="0,0,8,0" />
+                    <Grid Width="40" Height="40" Margin="0,0,8,0">
+                        <!-- アイコンなし → イニシャル -->
+                        <Border CornerRadius="8"
+                                Background="{Binding InitialColor, Converter={StaticResource StringToBrushConverter}}"
+                                Visibility="{Binding NoIcon, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <TextBlock Text="{Binding InitialLetter}" FontSize="18" FontWeight="Bold"
+                                       Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <!-- アイコンあり → 画像 -->
+                        <Image Source="{Binding IconUrl, Converter={StaticResource StringToImageSourceConverter}}"
+                               Visibility="{Binding HasIcon, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                    </Grid>
                     <StackPanel VerticalAlignment="Center">
                         <DockPanel>
                             <Border DockPanel.Dock="Right" Background="#F59E0B" CornerRadius="4" Padding="5,1" Margin="6,0,0,0"
