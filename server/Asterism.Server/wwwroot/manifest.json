@@ -1,0 +1,29 @@
+{
+  "tools": [
+    {
+      "id": "tool-db-converter",
+      "name": "DB Converter",
+      "version": "1.1.0",
+      "description": "社内データベースのフォーマット変換ツール",
+      "category": "データ変換",
+      "tags": ["db", "csv", "社内製"],
+      "iconUrl": "icons/db-converter.png",
+      "downloadUrl": "tools/db-converter-1.1.0.zip",
+      "packageType": "Zip",
+      "executablePath": "DbConverter.exe"
+    },
+    {
+      "id": "tool-sample-installer",
+      "name": "Sample Installer App",
+      "version": "1.0.0",
+      "description": "既製ツールのインストーラー配布に対応するデモ用サンプル",
+      "category": "開発ツール",
+      "tags": ["installer", "demo"],
+      "iconUrl": "icons/sample-installer.png",
+      "downloadUrl": "tools/sample-installer-1.0.0.exe",
+      "packageType": "Installer",
+      "installerArgs": "--silent",
+      "executablePath": "%LOCALAPPDATA%\\Asterism\\DemoInstalled\\SampleInstalledApp\\SampleInstalledApp.exe"
+    }
+  ]
+}
