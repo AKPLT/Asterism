@@ -6,8 +6,8 @@
              xmlns:vm="clr-namespace:Asterism.Client.ViewModels"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=vm:ToolCardViewModel}"
-             Width="260" Margin="6">
-    <Border BorderThickness="1" CornerRadius="6" Padding="12" Background="White">
+             Width="260" Height="280" Margin="6">
+    <Border BorderThickness="1" CornerRadius="6" Background="White">
         <Border.Style>
             <Style TargetType="Border">
                 <Setter Property="BorderBrush" Value="#DDDDDD" />
@@ -18,78 +18,87 @@
                 </Style.Triggers>
             </Style>
         </Border.Style>
-        <StackPanel>
-            <StackPanel Orientation="Horizontal">
-                <Image Source="{Binding IconUrl, Converter={StaticResource StringToImageSourceConverter}}"
-                       Width="40" Height="40" Margin="0,0,8,0" />
-                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Stretch">
-                    <DockPanel>
-                        <Border DockPanel.Dock="Right" Background="#F59E0B" CornerRadius="4" Padding="5,1" Margin="6,0,0,0"
-                                Visibility="{Binding IsUpdateAvailable, Converter={StaticResource BooleanToVisibilityConverter}}">
-                            <TextBlock Text="更新あり" FontSize="10" FontWeight="Bold" Foreground="White" />
-                        </Border>
-                        <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="14" TextWrapping="Wrap" />
-                    </DockPanel>
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="{Binding Category}" FontSize="11" Foreground="Gray" />
-                        <TextBlock Text=" · " FontSize="11" Foreground="Gray" />
-                        <TextBlock Text="{Binding VersionText, StringFormat='v{0}'}" FontSize="11" Foreground="Gray" />
+
+        <DockPanel Margin="12" LastChildFill="True">
+
+            <!-- 下部: プログレス・エラー・ボタン (常に最下部) -->
+            <StackPanel DockPanel.Dock="Bottom">
+                <ProgressBar Height="6" Margin="0,4,0,0" Minimum="0" Maximum="1"
+                             Value="{Binding ProgressPercent, Mode=OneWay}"
+                             Visibility="{Binding IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                <TextBlock Text="{Binding ErrorMessage}" Foreground="Red" TextWrapping="Wrap" Margin="0,4,0,0"
+                           Visibility="{Binding ErrorMessage, Converter={StaticResource NullToVisibilityConverter}}" />
+                <Grid Margin="0,8,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <Button Grid.Column="0" Content="{Binding PrimaryButtonLabel}"
+                            Command="{Binding PrimaryActionCommand}" Padding="0,6" />
+                    <Button Grid.Column="1" Content="アンインストール" Margin="6,0,0,0" Padding="8,6"
+                            Command="{Binding UninstallCommand}" />
+                </Grid>
+            </StackPanel>
+
+            <!-- 上部: アイコン・名前・バージョン・バッジ -->
+            <StackPanel DockPanel.Dock="Top">
+                <StackPanel Orientation="Horizontal">
+                    <Image Source="{Binding IconUrl, Converter={StaticResource StringToImageSourceConverter}}"
+                           Width="40" Height="40" Margin="0,0,8,0" />
+                    <StackPanel VerticalAlignment="Center">
+                        <DockPanel>
+                            <Border DockPanel.Dock="Right" Background="#F59E0B" CornerRadius="4" Padding="5,1" Margin="6,0,0,0"
+                                    Visibility="{Binding IsUpdateAvailable, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <TextBlock Text="更新あり" FontSize="10" FontWeight="Bold" Foreground="White" />
+                            </Border>
+                            <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="14" TextWrapping="Wrap" />
+                        </DockPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{Binding Category}" FontSize="11" Foreground="Gray" />
+                            <TextBlock Text=" · " FontSize="11" Foreground="Gray" />
+                            <TextBlock Text="{Binding VersionText, StringFormat='v{0}'}" FontSize="11" Foreground="Gray" />
+                        </StackPanel>
                     </StackPanel>
                 </StackPanel>
             </StackPanel>
 
-            <TextBlock Text="{Binding Description}" TextWrapping="Wrap" Margin="0,8,0,0"
-                       MaxHeight="54" TextTrimming="CharacterEllipsis" />
+            <!-- 中央: 説明・タグ (残りスペースを埋める) -->
+            <StackPanel>
+                <TextBlock Text="{Binding Description}" TextWrapping="Wrap" Margin="0,8,0,0"
+                           MaxHeight="54" TextTrimming="CharacterEllipsis" />
 
-            <ItemsControl ItemsSource="{Binding Tags}" Margin="0,6,0,0">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <WrapPanel />
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <Button Command="{Binding DataContext.SelectTagCommand,
-                                    RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                CommandParameter="{Binding}"
-                                Cursor="Hand" Margin="0,0,4,4"
-                                Background="Transparent" BorderThickness="0" Padding="0">
-                            <Border Background="#EEEEEE" CornerRadius="8" Padding="6,2">
-                                <Border.Style>
-                                    <Style TargetType="Border">
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsMouseOver,
-                                                RelativeSource={RelativeSource AncestorType=Button}}" Value="True">
-                                                <Setter Property="Background" Value="#D1D5DB" />
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Border.Style>
-                                <TextBlock Text="{Binding}" FontSize="10" />
-                            </Border>
-                        </Button>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
+                <ItemsControl ItemsSource="{Binding Tags}" Margin="0,6,0,0">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Button Command="{Binding DataContext.SelectTagCommand,
+                                        RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                    CommandParameter="{Binding}"
+                                    Cursor="Hand" Margin="0,0,4,4"
+                                    Background="Transparent" BorderThickness="0" Padding="0">
+                                <Border Background="#EEEEEE" CornerRadius="8" Padding="6,2">
+                                    <Border.Style>
+                                        <Style TargetType="Border">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsMouseOver,
+                                                    RelativeSource={RelativeSource AncestorType=Button}}" Value="True">
+                                                    <Setter Property="Background" Value="#D1D5DB" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Border.Style>
+                                    <TextBlock Text="{Binding}" FontSize="10" />
+                                </Border>
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
 
-            <ProgressBar Height="6" Margin="0,8,0,0" Minimum="0" Maximum="1"
-                         Value="{Binding ProgressPercent, Mode=OneWay}"
-                         Visibility="{Binding IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}" />
-
-            <TextBlock Text="{Binding ErrorMessage}" Foreground="Red" TextWrapping="Wrap" Margin="0,6,0,0"
-                       Visibility="{Binding ErrorMessage, Converter={StaticResource NullToVisibilityConverter}}" />
-
-            <Grid Margin="0,10,0,0">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-
-                <Button Grid.Column="0" Content="{Binding PrimaryButtonLabel}"
-                        Command="{Binding PrimaryActionCommand}" Padding="0,6" />
-                <Button Grid.Column="1" Content="アンインストール" Margin="6,0,0,0" Padding="8,6"
-                        Command="{Binding UninstallCommand}" />
-            </Grid>
-        </StackPanel>
+        </DockPanel>
     </Border>
 </UserControl>

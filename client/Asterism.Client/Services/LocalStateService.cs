@@ -20,7 +20,9 @@ public sealed class LocalStateService : ILocalStateService
     public string ToolsRootDirectory =>
         _userSettingsService.ToolsDirectory is { Length: > 0 } dir
             ? dir
-            : Path.Combine(_rootDirectory, "Tools");
+            : Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+                "Downloads", "Asterism");
 
     public LocalStateService(IUserSettingsService userSettingsService)
     {

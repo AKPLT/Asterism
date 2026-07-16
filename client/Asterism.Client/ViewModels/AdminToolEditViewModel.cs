@@ -1,3 +1,5 @@
+using System.IO;
+using System.Text.RegularExpressions;
 using Asterism.Client.Services;
 using Asterism.Client.Services.Exceptions;
 using Asterism.Shared.Models;
@@ -10,6 +12,8 @@ public partial class AdminToolEditViewModel : ObservableObject
 {
     private readonly IAdminApiService _adminApiService;
     private bool _isNew;
+    private bool _idAutoFilled;
+    private bool _settingAutoId;
 
     [ObservableProperty]
     private string id = "";
@@ -46,6 +50,38 @@ public partial class AdminToolEditViewModel : ObservableObject
 
     [ObservableProperty]
     private string? iconFilePath;
+
+    partial void OnIdChanged(string value)
+    {
+        if (!_settingAutoId)
+            _idAutoFilled = false;
+    }
+
+    partial void OnPackageFilePathChanged(string? value)
+    {
+        if (!_isNew || value is null) return;
+
+        var ext = Path.GetExtension(value).ToLowerInvariant();
+        if (ext == ".zip") PackageType = PackageType.Zip;
+        else if (ext is ".exe" or ".msi") PackageType = PackageType.Installer;
+
+        if (string.IsNullOrEmpty(Id) || _idAutoFilled)
+        {
+            _settingAutoId = true;
+            Id = GenerateId(value);
+            _settingAutoId = false;
+            _idAutoFilled = true;
+        }
+    }
+
+    private static string GenerateId(string filePath)
+    {
+        var name = Path.GetFileNameWithoutExtension(filePath);
+        name = Regex.Replace(name, @"[-_. ]\d+(\.\d+)*$", "");
+        name = Regex.Replace(name, @"[^a-zA-Z0-9]+", "-").ToLowerInvariant().Trim('-');
+        name = Regex.Replace(name, @"-+", "-");
+        return $"tool-{name}";
+    }
 
     [ObservableProperty]
     private string? errorMessage;
@@ -101,6 +137,8 @@ public partial class AdminToolEditViewModel : ObservableObject
         PackageFilePath = null;
         IconFilePath = null;
         ErrorMessage = null;
+        _idAutoFilled = false;
+        _settingAutoId = false;
     }
 
     [RelayCommand(CanExecute = nameof(CanSave))]
