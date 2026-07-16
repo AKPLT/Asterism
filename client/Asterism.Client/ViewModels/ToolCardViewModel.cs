@@ -109,11 +109,25 @@ public partial class ToolCardViewModel : ObservableObject
         RefreshState();
     }
 
-    private void RefreshState()
+    public void RefreshState()
     {
         _installedRecord = _localStateService.GetRecord(Tool.Id);
         if (_installedRecord == null)
         {
+            State = ToolCardState.NotInstalled;
+            return;
+        }
+
+        var expectedInstallPath = Path.Combine(_localStateService.ToolsRootDirectory, Tool.Id);
+        var isUnderCurrentRoot = string.Equals(
+            Path.GetFullPath(_installedRecord.InstallPath).TrimEnd(Path.DirectorySeparatorChar),
+            Path.GetFullPath(expectedInstallPath).TrimEnd(Path.DirectorySeparatorChar),
+            StringComparison.OrdinalIgnoreCase);
+        var exeExists = File.Exists(Path.Combine(_installedRecord.InstallPath, Tool.ExecutablePath));
+
+        if (!isUnderCurrentRoot || !exeExists)
+        {
+            _installedRecord = null;
             State = ToolCardState.NotInstalled;
             return;
         }
@@ -156,6 +170,20 @@ public partial class ToolCardViewModel : ObservableObject
 
     private async Task InstallOrUpdateInternalAsync(CancellationToken ct)
     {
+        if (_installedRecord is null)
+        {
+            var expectedInstallPath = Path.Combine(_localStateService.ToolsRootDirectory, Tool.Id);
+            if (Directory.Exists(expectedInstallPath))
+            {
+                var result = MessageBox.Show(
+                    $"インストール先に既存のフォルダがあります:\n{expectedInstallPath}\n\nこのフォルダの中身は削除されてから新規インストールされます。続行しますか？",
+                    "確認",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Warning);
+                if (result != MessageBoxResult.Yes) return;
+            }
+        }
+
         IsBusy = true;
         ErrorMessage = null;
         ProgressPercent = 0;

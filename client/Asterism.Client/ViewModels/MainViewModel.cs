@@ -272,6 +272,11 @@ public partial class MainViewModel : ObservableObject
         _userSettingsService.ToolsDirectory = dialog.FolderName;
         _userSettingsService.Save();
         InstallDirectory = _localStateService.ToolsRootDirectory;
+
+        foreach (var card in AllTools)
+        {
+            card.RefreshState();
+        }
     }
 
     partial void OnSearchTextChanged(string value)
