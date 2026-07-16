@@ -1,4 +1,5 @@
 using System.IO;
+using System.IO.Compression;
 using System.Text.RegularExpressions;
 using Asterism.Client.Services;
 using Asterism.Client.Services.Exceptions;
@@ -63,6 +64,8 @@ public partial class AdminToolEditViewModel : ObservableObject
             _settingAutoId = false;
             _idAutoFilled = true;
         }
+
+        TryAutoFillFromPackage(value);
     }
 
     private static string GenerateId(string filePath)
@@ -71,7 +74,44 @@ public partial class AdminToolEditViewModel : ObservableObject
         name = Regex.Replace(name, @"[-_. ]\d+(\.\d+)*$", "");
         name = Regex.Replace(name, @"[^a-zA-Z0-9]+", "-").ToLowerInvariant().Trim('-');
         name = Regex.Replace(name, @"-+", "-");
-        return $"tool-{name}";
+        return name;
+    }
+
+    private void TryAutoFillFromPackage(string zipPath)
+    {
+        try
+        {
+            using var archive = ZipFile.OpenRead(zipPath);
+
+            // インストール時にzip直下のフォルダが1つだけなら剥がされる仕様に合わせて照合する
+            var entryNames = archive.Entries.Select(e => e.FullName.Replace('\\', '/')).ToList();
+            var topLevelSegments = entryNames.Select(n => n.Split('/')[0]).Distinct().ToList();
+            string? stripPrefix = null;
+            if (topLevelSegments.Count == 1 && entryNames.Any(n => n.Contains('/')))
+            {
+                stripPrefix = topLevelSegments[0] + "/";
+            }
+
+            var exeEntries = archive.Entries
+                .Where(e => Path.GetExtension(e.FullName).Equals(".exe", StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            if (exeEntries.Count != 1) return;
+
+            var exeEntry = exeEntries[0];
+            var relativePath = exeEntry.FullName.Replace('\\', '/');
+            if (stripPrefix is not null && relativePath.StartsWith(stripPrefix, StringComparison.OrdinalIgnoreCase))
+                relativePath = relativePath[stripPrefix.Length..];
+
+            if (string.IsNullOrWhiteSpace(ExecutablePath))
+            {
+                ExecutablePath = relativePath.Replace('/', Path.DirectorySeparatorChar);
+            }
+        }
+        catch (InvalidDataException)
+        {
+            // zipとして開けない場合は自動入力をあきらめ、手動入力に任せる
+        }
     }
 
     [ObservableProperty]
