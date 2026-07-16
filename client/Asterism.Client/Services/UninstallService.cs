@@ -1,5 +1,6 @@
 using System.IO;
 using Asterism.Client.Models;
+using Asterism.Shared.Models;
 
 namespace Asterism.Client.Services;
 

@@ -1,3 +1,5 @@
+using Asterism.Shared.Models;
+
 namespace Asterism.Client.Models;
 
 public sealed class InstalledToolRecord

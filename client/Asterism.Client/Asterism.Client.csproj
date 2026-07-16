@@ -20,4 +20,8 @@
     </Content>
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\shared\Asterism.Shared\Asterism.Shared.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -17,6 +17,8 @@ public partial class App : Application
 
     protected override async void OnStartup(StartupEventArgs e)
     {
+        System.Windows.Media.RenderOptions.ProcessRenderMode = System.Windows.Interop.RenderMode.SoftwareOnly;
+
         _host = Host.CreateDefaultBuilder()
             .ConfigureAppConfiguration(cfg => cfg.AddJsonFile("appsettings.json", optional: false))
             .ConfigureServices((context, services) =>
@@ -35,9 +37,16 @@ public partial class App : Application
                 services.AddSingleton<IInstallService, InstallService>();
                 services.AddSingleton<ILaunchService, LaunchService>();
                 services.AddSingleton<IUninstallService, UninstallService>();
+                services.AddSingleton<IAdminApiService, AdminApiService>();
 
                 services.AddSingleton<MainViewModel>();
                 services.AddSingleton<MainWindow>();
+
+                services.AddTransient<PasswordDialog>();
+                services.AddTransient<AdminViewModel>();
+                services.AddTransient<AdminWindow>();
+                services.AddTransient<AdminToolEditViewModel>();
+                services.AddTransient<AdminToolEditWindow>();
             })
             .Build();
 

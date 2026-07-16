@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace Asterism.Client.Models;
+namespace Asterism.Shared.Models;
 
 public sealed class ToolManifest
 {

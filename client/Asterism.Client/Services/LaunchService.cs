@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.IO;
 using Asterism.Client.Models;
 using Asterism.Client.Services.Exceptions;
+using Asterism.Shared.Models;
 
 namespace Asterism.Client.Services;
 

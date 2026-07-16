@@ -5,6 +5,7 @@ using System.Windows.Threading;
 using Asterism.Client.Options;
 using Asterism.Client.Services;
 using Asterism.Client.Services.Exceptions;
+using Asterism.Shared.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Options;
@@ -122,7 +123,7 @@ public partial class MainViewModel : ObservableObject
         }
     }
 
-    private void ApplyManifest(IReadOnlyList<Models.ToolEntry> tools, bool isOffline)
+    private void ApplyManifest(IReadOnlyList<ToolEntry> tools, bool isOffline)
     {
         var incomingIds = tools.Select(t => t.Id).ToHashSet();
 

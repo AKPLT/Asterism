@@ -1,4 +1,4 @@
-namespace Asterism.Client.Models;
+namespace Asterism.Shared.Models;
 
 public enum PackageType
 {

@@ -3,6 +3,7 @@ using System.Windows;
 using Asterism.Client.Models;
 using Asterism.Client.Services;
 using Asterism.Client.Services.Exceptions;
+using Asterism.Shared.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 

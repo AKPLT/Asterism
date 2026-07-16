@@ -1,8 +1,8 @@
 using System.IO;
 using System.Net.Http;
 using System.Text.Json;
-using Asterism.Client.Models;
 using Asterism.Client.Services.Exceptions;
+using Asterism.Shared.Models;
 
 namespace Asterism.Client.Services;
 

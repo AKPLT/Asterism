@@ -5,6 +5,7 @@ using System.IO.Compression;
 using System.Net.Http;
 using Asterism.Client.Models;
 using Asterism.Client.Services.Exceptions;
+using Asterism.Shared.Models;
 
 namespace Asterism.Client.Services;
 
