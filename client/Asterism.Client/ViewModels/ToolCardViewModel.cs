@@ -36,10 +36,12 @@ public partial class ToolCardViewModel : ObservableObject
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(PrimaryButtonLabel))]
     [NotifyPropertyChangedFor(nameof(IsUpdateAvailable))]
+    [NotifyPropertyChangedFor(nameof(IsLatest))]
     [NotifyCanExecuteChangedFor(nameof(UninstallCommand))]
     private ToolCardState state;
 
     public bool IsUpdateAvailable => State == ToolCardState.UpdateAvailable;
+    public bool IsLatest => State == ToolCardState.Installed;
     public string VersionText => Tool.Version;
     public bool HasIcon => !string.IsNullOrEmpty(Tool.IconUrl);
     public bool NoIcon => string.IsNullOrEmpty(Tool.IconUrl);

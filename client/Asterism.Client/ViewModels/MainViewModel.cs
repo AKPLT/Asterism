@@ -240,6 +240,7 @@ public partial class MainViewModel : ObservableObject
         Categories.Add(builtList[0]); // "すべて"
         Categories.Add(ToolFilter.FavoritesLabel);
         Categories.Add(ToolFilter.InstalledLabel);
+        Categories.Add(ToolFilter.SeparatorLabel);
         for (var i = 1; i < builtList.Count; i++)
             Categories.Add(builtList[i]);
 

@@ -78,6 +78,10 @@
                                     Visibility="{Binding IsUpdateAvailable, Converter={StaticResource BooleanToVisibilityConverter}}">
                                 <TextBlock Text="更新あり" FontSize="10" FontWeight="Bold" Foreground="White" />
                             </Border>
+                            <Border DockPanel.Dock="Right" Background="#059669" CornerRadius="4" Padding="5,1" Margin="6,0,0,0"
+                                    Visibility="{Binding IsLatest, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                <TextBlock Text="最新" FontSize="10" FontWeight="Bold" Foreground="White" />
+                            </Border>
                             <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="14" TextWrapping="Wrap" />
                         </DockPanel>
                         <StackPanel Orientation="Horizontal">

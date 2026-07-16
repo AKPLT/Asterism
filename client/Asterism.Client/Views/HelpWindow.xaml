@@ -47,7 +47,7 @@
                 <TextBlock Style="{StaticResource Bullet}">• 上部の検索ボックスにキーワードを入力すると、名前・説明・タグで絞り込めます。</TextBlock>
                 <TextBlock Style="{StaticResource Bullet}">• 左のサイドバーでカテゴリを選択して絞り込めます。</TextBlock>
                 <TextBlock Style="{StaticResource Bullet}">• 「インストール済み」を選ぶと導入済みのツールのみ表示されます。</TextBlock>
-                <TextBlock Style="{StaticResource Bullet}">• 「★ お気に入り」でお気に入り登録したツールのみ表示されます。</TextBlock>
+                <TextBlock Style="{StaticResource Bullet}">• 「お気に入り」でお気に入り登録したツールのみ表示されます。</TextBlock>
                 <TextBlock Style="{StaticResource Bullet}">• 右上の「並び替え」で名前順・カテゴリ順・更新あり優先に切り替えられます。</TextBlock>
                 <TextBlock Style="{StaticResource Bullet}">• カードのタグをクリックすると、そのタグで検索が実行されます。</TextBlock>
 
@@ -84,15 +84,6 @@
                 <TextBlock Style="{StaticResource Bullet}">• ウィンドウの × ボタンを押すと画面が閉じますが、アプリはシステムトレイで動き続けます。</TextBlock>
                 <TextBlock Style="{StaticResource Bullet}">• トレイアイコンをダブルクリック、または右クリック→「Asterism を開く」でウィンドウを再表示できます。</TextBlock>
                 <TextBlock Style="{StaticResource Bullet}">• 右クリック→「終了」を選択するとアプリを完全に終了できます。</TextBlock>
-
-                <!-- 管理者モード -->
-                <TextBlock Style="{StaticResource SectionHeader}">管理者モード（ツール登録・編集）</TextBlock>
-                <TextBlock Style="{StaticResource Bullet}">• メニューバーの「ツール → 管理者モード」から管理者パスワードでロックを解除します。</TextBlock>
-                <TextBlock Style="{StaticResource Bullet}">• 管理者モードではツールの新規登録・編集・削除ができます。</TextBlock>
-                <TextBlock Style="{StaticResource Bullet}">• 新規登録時にZIPファイルを選択するとID・配布形式が自動入力されます。</TextBlock>
-                <TextBlock Style="{StaticResource Bullet}">• 「無効化」チェックを入れると、そのツールを一般ユーザーの一覧から非表示にできます。</TextBlock>
-                <TextBlock Style="{StaticResource Bullet}">• 削除はmanifest.jsonからエントリを除くのみで、サーバー上のZIPファイルは残ります。</TextBlock>
-                <TextBlock Style="{StaticResource Bullet}" Margin="12,2,0,24">• 管理者パスワードはサーバーの <Run FontWeight="SemiBold">appsettings.json</Run> の <Run FontWeight="SemiBold">Asterism:AdminApiKey</Run> で設定します。</TextBlock>
 
             </StackPanel>
         </ScrollViewer>

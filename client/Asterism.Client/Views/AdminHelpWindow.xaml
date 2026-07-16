@@ -1,0 +1,76 @@
+<Window x:Class="Asterism.Client.Views.AdminHelpWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="管理者向け使い方" Height="540" Width="620"
+        WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False">
+    <Window.Resources>
+        <Style x:Key="SectionHeader" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Foreground" Value="#4F46E5" />
+            <Setter Property="Margin" Value="0,20,0,6" />
+        </Style>
+        <Style x:Key="Body" TargetType="TextBlock">
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="LineHeight" Value="20" />
+            <Setter Property="Foreground" Value="#333333" />
+        </Style>
+        <Style x:Key="Bullet" TargetType="TextBlock">
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="LineHeight" Value="20" />
+            <Setter Property="Foreground" Value="#333333" />
+            <Setter Property="Margin" Value="12,2,0,0" />
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" Padding="24,16,24,8">
+            <StackPanel>
+
+                <!-- パスワード設定 -->
+                <TextBlock Style="{StaticResource SectionHeader}" Margin="0,4,0,6">管理者パスワードの設定</TextBlock>
+                <TextBlock Style="{StaticResource Bullet}">• 管理者パスワードはサーバーの <Run FontWeight="SemiBold">appsettings.json</Run> の <Run FontWeight="SemiBold">Asterism:AdminApiKey</Run> で設定します。</TextBlock>
+                <TextBlock Style="{StaticResource Bullet}">• パスワードはサーバー側でのみ管理され、クライアントに保存されません。</TextBlock>
+                <TextBlock Style="{StaticResource Bullet}">• 管理者ウィンドウを閉じると、セッションのパスワードは自動的に破棄されます。</TextBlock>
+
+                <!-- ツール登録 -->
+                <TextBlock Style="{StaticResource SectionHeader}">ツールの新規登録</TextBlock>
+                <TextBlock Style="{StaticResource Bullet}">• 「新規登録」ボタンから登録フォームを開きます。</TextBlock>
+                <TextBlock Style="{StaticResource Bullet}">• ZIPファイルを選択するとID・ファイル名が自動入力されます。必要に応じて変更してください。</TextBlock>
+                <TextBlock Style="{StaticResource Bullet}">• 「実行ファイルパス」にはZIP展開後の起動ファイルの相対パスを入力します（例: <Run FontWeight="SemiBold">MyTool.exe</Run>）。</TextBlock>
+                <TextBlock Style="{StaticResource Bullet}">• アイコン画像（PNG推奨）を選択するとカード上に表示されます。省略時はデフォルトアイコンが使われます。</TextBlock>
+                <TextBlock Style="{StaticResource Bullet}">• 「保存」を押すとZIPとアイコンがサーバーにアップロードされ、manifest.json に追加されます。</TextBlock>
+
+                <!-- ツール編集 -->
+                <TextBlock Style="{StaticResource SectionHeader}">ツールの編集</TextBlock>
+                <TextBlock Style="{StaticResource Bullet}">• 一覧の「編集」ボタンから編集フォームを開きます。</TextBlock>
+                <TextBlock Style="{StaticResource Bullet}">• バージョンを上げる場合は、新しいZIPファイルを選択し直してください。</TextBlock>
+                <TextBlock Style="{StaticResource Bullet}">• ファイルを差し替えない場合は、ZIPフィールドを空のままにすると既存ファイルが維持されます。</TextBlock>
+
+                <!-- ツール無効化 -->
+                <TextBlock Style="{StaticResource SectionHeader}">ツールの無効化</TextBlock>
+                <TextBlock Style="{StaticResource Bullet}">• 編集フォームの「無効化」チェックを入れると、そのツールを一般ユーザーの一覧から非表示にできます。</TextBlock>
+                <TextBlock Style="{StaticResource Bullet}">• 無効化されたツールは管理者モードの一覧では引き続き表示されます。</TextBlock>
+                <TextBlock Style="{StaticResource Bullet}">• 一時的に公開を停止したい場合などに使用してください。</TextBlock>
+
+                <!-- ツール削除 -->
+                <TextBlock Style="{StaticResource SectionHeader}">ツールの削除</TextBlock>
+                <TextBlock Style="{StaticResource Bullet}">• 一覧の「削除」ボタンを押すと manifest.json からエントリが除去されます。</TextBlock>
+                <TextBlock Style="{StaticResource Bullet}" Margin="12,2,0,24">• サーバー上のZIPファイル・アイコン画像は削除されません（誤削除防止のため手動での管理が必要です）。</TextBlock>
+
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- フッター -->
+        <Border Grid.Row="1" BorderBrush="#E5E7EB" BorderThickness="0,1,0,0" Padding="24,10">
+            <Button Content="閉じる" Width="80" HorizontalAlignment="Right"
+                    Padding="0,6" Click="OnCloseClick" IsDefault="True" />
+        </Border>
+    </Grid>
+</Window>

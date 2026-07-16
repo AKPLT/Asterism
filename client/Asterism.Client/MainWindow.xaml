@@ -73,7 +73,24 @@
 
             <ListBox Grid.Column="0" Margin="0,0,8,0"
                      ItemsSource="{Binding Categories}"
-                     SelectedItem="{Binding SelectedCategory}" />
+                     SelectedItem="{Binding SelectedCategory}">
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="ListBoxItem">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding}" Value="__separator__">
+                                <Setter Property="IsEnabled" Value="False" />
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="ListBoxItem">
+                                            <Separator Margin="4,4,4,4" />
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ListBox.ItemContainerStyle>
+            </ListBox>
 
             <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
                 <ItemsControl ItemsSource="{Binding ToolsView}">

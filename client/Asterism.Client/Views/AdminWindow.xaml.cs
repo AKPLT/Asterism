@@ -53,4 +53,10 @@ public partial class AdminWindow : Window
         var tool = (ToolEntry)((FrameworkElement)sender).Tag;
         await _viewModel.DeleteCommand.ExecuteAsync(tool);
     }
+
+    private void OnAdminHelpClick(object sender, RoutedEventArgs e)
+    {
+        var win = new AdminHelpWindow { Owner = this };
+        win.Show();
+    }
 }
