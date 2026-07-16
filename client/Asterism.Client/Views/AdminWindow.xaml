@@ -1,7 +1,7 @@
 <Window x:Class="Asterism.Client.Views.AdminWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="管理者モード - ツール管理" Height="500" Width="720">
+        Title="管理者モード - ツール管理" Height="540" Width="900">
     <Grid Margin="12">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -13,31 +13,45 @@
             <TextBlock Text="ツール管理" FontSize="18" FontWeight="Bold" VerticalAlignment="Center" DockPanel.Dock="Left" />
             <Button Content="新規登録" DockPanel.Dock="Right" Padding="10,4" Click="OnAddNewClick" />
             <Button Content="更新" DockPanel.Dock="Right" Padding="10,4" Margin="0,0,8,0" Command="{Binding LoadCommand}" />
+            <TextBlock Text="検索:" DockPanel.Dock="Left" Margin="24,0,4,0" VerticalAlignment="Center" />
+            <TextBox Margin="0,0,0,0" Padding="6,4" VerticalContentAlignment="Center"
+                     Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
         </DockPanel>
 
         <TextBlock Grid.Row="1" Text="{Binding ErrorMessage}" Foreground="Red" Margin="0,0,0,8" TextWrapping="Wrap"
                    Visibility="{Binding ErrorMessage, Converter={StaticResource NullToVisibilityConverter}}" />
 
-        <ListView Grid.Row="2" ItemsSource="{Binding Tools}">
-            <ListView.View>
-                <GridView>
-                    <GridViewColumn Header="ID" Width="160" DisplayMemberBinding="{Binding Id}" />
-                    <GridViewColumn Header="名前" Width="140" DisplayMemberBinding="{Binding Name}" />
-                    <GridViewColumn Header="バージョン" Width="80" DisplayMemberBinding="{Binding Version}" />
-                    <GridViewColumn Header="カテゴリ" Width="100" DisplayMemberBinding="{Binding Category}" />
-                    <GridViewColumn Header="種別" Width="70" DisplayMemberBinding="{Binding PackageType}" />
-                    <GridViewColumn Header="操作" Width="140">
-                        <GridViewColumn.CellTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Horizontal">
-                                    <Button Content="編集" Padding="8,2" Click="OnEditClick" Tag="{Binding}" />
-                                    <Button Content="削除" Padding="8,2" Margin="4,0,0,0" Click="OnDeleteClick" Tag="{Binding}" />
-                                </StackPanel>
-                            </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
-                </GridView>
-            </ListView.View>
-        </ListView>
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="160" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <ListBox Grid.Column="0" Margin="0,0,8,0"
+                     ItemsSource="{Binding Categories}"
+                     SelectedItem="{Binding SelectedCategory}" />
+
+            <ListView Grid.Column="1" ItemsSource="{Binding ToolsView}">
+                <ListView.View>
+                    <GridView>
+                        <GridViewColumn Header="ID" Width="160" DisplayMemberBinding="{Binding Id}" />
+                        <GridViewColumn Header="名前" Width="140" DisplayMemberBinding="{Binding Name}" />
+                        <GridViewColumn Header="バージョン" Width="80" DisplayMemberBinding="{Binding Version}" />
+                        <GridViewColumn Header="カテゴリ" Width="100" DisplayMemberBinding="{Binding Category}" />
+                        <GridViewColumn Header="種別" Width="70" DisplayMemberBinding="{Binding PackageType}" />
+                        <GridViewColumn Header="操作" Width="140">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Button Content="編集" Padding="8,2" Click="OnEditClick" Tag="{Binding}" />
+                                        <Button Content="削除" Padding="8,2" Margin="4,0,0,0" Click="OnDeleteClick" Tag="{Binding}" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                    </GridView>
+                </ListView.View>
+            </ListView>
+        </Grid>
     </Grid>
 </Window>

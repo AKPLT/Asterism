@@ -1,5 +1,7 @@
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Windows;
+using System.Windows.Data;
 using Asterism.Client.Services;
 using Asterism.Client.Services.Exceptions;
 using Asterism.Shared.Models;
@@ -10,9 +12,19 @@ namespace Asterism.Client.ViewModels;
 
 public partial class AdminViewModel : ObservableObject
 {
+    public const string AllCategoriesLabel = ToolFilter.AllCategoriesLabel;
+
     private readonly IAdminApiService _adminApiService;
 
     public ObservableCollection<ToolEntry> Tools { get; } = new();
+    public ObservableCollection<string> Categories { get; } = new() { AllCategoriesLabel };
+    public ICollectionView ToolsView { get; }
+
+    [ObservableProperty]
+    private string searchText = "";
+
+    [ObservableProperty]
+    private string selectedCategory = AllCategoriesLabel;
 
     [ObservableProperty]
     private string? errorMessage;
@@ -23,6 +35,9 @@ public partial class AdminViewModel : ObservableObject
     public AdminViewModel(IAdminApiService adminApiService)
     {
         _adminApiService = adminApiService;
+
+        ToolsView = CollectionViewSource.GetDefaultView(Tools);
+        ToolsView.Filter = FilterPredicate;
     }
 
     [RelayCommand]
@@ -39,6 +54,9 @@ public partial class AdminViewModel : ObservableObject
             {
                 Tools.Add(tool);
             }
+
+            RebuildCategories();
+            ToolsView.Refresh();
         }
         catch (AdminApiException ex)
         {
@@ -70,5 +88,27 @@ public partial class AdminViewModel : ObservableObject
         {
             ErrorMessage = ex.Message;
         }
+    }
+
+    private void RebuildCategories()
+    {
+        var current = SelectedCategory;
+
+        Categories.Clear();
+        foreach (var category in ToolFilter.BuildCategoryList(Tools.Select(t => t.Category)))
+        {
+            Categories.Add(category);
+        }
+
+        SelectedCategory = Categories.Contains(current) ? current : AllCategoriesLabel;
+    }
+
+    partial void OnSearchTextChanged(string value) => ToolsView.Refresh();
+
+    partial void OnSelectedCategoryChanged(string value) => ToolsView.Refresh();
+
+    private bool FilterPredicate(object obj)
+    {
+        return obj is ToolEntry tool && ToolFilter.Matches(tool, SearchText, SelectedCategory);
     }
 }

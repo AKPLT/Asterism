@@ -14,7 +14,7 @@ namespace Asterism.Client.ViewModels;
 
 public partial class MainViewModel : ObservableObject
 {
-    public const string AllCategoriesLabel = "すべて";
+    public const string AllCategoriesLabel = ToolFilter.AllCategoriesLabel;
 
     private readonly IManifestService _manifestService;
     private readonly ILocalStateService _localStateService;
@@ -187,8 +187,7 @@ public partial class MainViewModel : ObservableObject
         var current = SelectedCategory;
 
         Categories.Clear();
-        Categories.Add(AllCategoriesLabel);
-        foreach (var category in AllTools.Select(c => c.Category).Distinct().OrderBy(c => c, StringComparer.CurrentCulture))
+        foreach (var category in ToolFilter.BuildCategoryList(AllTools.Select(c => c.Category)))
         {
             Categories.Add(category);
         }
@@ -208,19 +207,6 @@ public partial class MainViewModel : ObservableObject
 
     private bool FilterPredicate(object obj)
     {
-        if (obj is not ToolCardViewModel card)
-        {
-            return false;
-        }
-
-        var categoryOk = SelectedCategory == AllCategoriesLabel || card.Category == SelectedCategory;
-
-        var text = SearchText?.Trim() ?? "";
-        var textOk = text.Length == 0
-            || card.Name.Contains(text, StringComparison.OrdinalIgnoreCase)
-            || card.Description.Contains(text, StringComparison.OrdinalIgnoreCase)
-            || card.Tags.Any(t => t.Contains(text, StringComparison.OrdinalIgnoreCase));
-
-        return categoryOk && textOk;
+        return obj is ToolCardViewModel card && ToolFilter.Matches(card.Tool, SearchText, SelectedCategory);
     }
 }
