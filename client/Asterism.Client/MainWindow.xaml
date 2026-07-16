@@ -21,8 +21,17 @@
             <Button Content="更新を確認" DockPanel.Dock="Right" Padding="10,4" Margin="8,0,0,0"
                     Command="{Binding RefreshManifestCommand}" />
             <TextBlock Text="検索:" DockPanel.Dock="Left" Margin="24,0,4,0" VerticalAlignment="Center" />
-            <TextBox x:Name="SearchBox" Margin="0,0,0,0" Padding="6,4" VerticalContentAlignment="Center"
-                     Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBox Grid.Column="0" Padding="6,4" VerticalContentAlignment="Center"
+                         Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" />
+                <Button Grid.Column="1" Content="✕" Padding="8,4" Margin="4,0,0,0"
+                        Command="{Binding ClearSearchCommand}"
+                        Visibility="{Binding HasSearchText, Converter={StaticResource BooleanToVisibilityConverter}}" />
+            </Grid>
         </DockPanel>
 
         <!-- バナー -->

@@ -21,7 +21,10 @@ public partial class AdminViewModel : ObservableObject
     public ICollectionView ToolsView { get; }
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasSearchText))]
     private string searchText = "";
+
+    public bool HasSearchText => SearchText.Length > 0;
 
     [ObservableProperty]
     private string selectedCategory = AllCategoriesLabel;
@@ -102,6 +105,9 @@ public partial class AdminViewModel : ObservableObject
 
         SelectedCategory = Categories.Contains(current) ? current : AllCategoriesLabel;
     }
+
+    [RelayCommand]
+    private void ClearSearch() => SearchText = "";
 
     partial void OnSearchTextChanged(string value) => ToolsView.Refresh();
 
