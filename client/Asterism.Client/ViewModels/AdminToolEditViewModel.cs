@@ -14,6 +14,7 @@ public partial class AdminToolEditViewModel : ObservableObject
     private bool _isNew;
     private bool _idAutoFilled;
     private bool _settingAutoId;
+    private string _originalVersion = "";
 
     [ObservableProperty]
     private string id = "";
@@ -44,9 +45,6 @@ public partial class AdminToolEditViewModel : ObservableObject
 
     [ObservableProperty]
     private string? packageFilePath;
-
-    [ObservableProperty]
-    private string? iconFilePath;
 
     partial void OnIdChanged(string value)
     {
@@ -93,7 +91,7 @@ public partial class AdminToolEditViewModel : ObservableObject
         _adminApiService = adminApiService;
     }
 
-    public void Initialize(ToolEntry? existing)
+    public void Initialize(ToolEntry? existing, string? initialPackagePath = null)
     {
         _isNew = existing is null;
         IsIdReadOnly = !_isNew;
@@ -109,6 +107,7 @@ public partial class AdminToolEditViewModel : ObservableObject
             ExecutablePath = "";
             IsDisabled = false;
             WindowTitle = "新規ツール登録";
+            _originalVersion = "";
         }
         else
         {
@@ -121,13 +120,13 @@ public partial class AdminToolEditViewModel : ObservableObject
             ExecutablePath = existing.ExecutablePath;
             IsDisabled = existing.IsDisabled;
             WindowTitle = $"ツール編集: {existing.Id}";
+            _originalVersion = existing.Version;
         }
 
-        PackageFilePath = null;
-        IconFilePath = null;
         ErrorMessage = null;
         _idAutoFilled = false;
         _settingAutoId = false;
+        PackageFilePath = initialPackagePath;
     }
 
     [RelayCommand(CanExecute = nameof(CanSave))]
@@ -155,6 +154,11 @@ public partial class AdminToolEditViewModel : ObservableObject
             ErrorMessage = "パッケージファイルを選択してください。";
             return;
         }
+        if (!_isNew && Version != _originalVersion && string.IsNullOrWhiteSpace(PackageFilePath))
+        {
+            ErrorMessage = "バージョンを変更する場合はパッケージファイルを選択してください。";
+            return;
+        }
 
         var entry = new ToolEntry
         {
@@ -175,9 +179,9 @@ public partial class AdminToolEditViewModel : ObservableObject
         try
         {
             if (_isNew)
-                await _adminApiService.CreateToolAsync(entry, PackageFilePath!, IconFilePath);
+                await _adminApiService.CreateToolAsync(entry, PackageFilePath!);
             else
-                await _adminApiService.UpdateToolAsync(Id, entry, PackageFilePath, IconFilePath);
+                await _adminApiService.UpdateToolAsync(Id, entry, PackageFilePath);
 
             SaveCompleted?.Invoke(this, EventArgs.Empty);
         }

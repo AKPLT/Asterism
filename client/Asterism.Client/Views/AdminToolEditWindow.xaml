@@ -1,11 +1,11 @@
 <Window x:Class="Asterism.Client.Views.AdminToolEditWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="{Binding WindowTitle}" Height="580" Width="480"
+        Title="{Binding WindowTitle}" Width="480" SizeToContent="Height"
         WindowStartupLocation="CenterOwner">
     <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="16">
         <StackPanel>
-            <TextBlock Text="パッケージファイル（.zip）（新規登録時は必須。編集時は未選択なら既存ファイルを維持）" FontWeight="Bold" TextWrapping="Wrap" />
+            <TextBlock Text="パッケージファイル（.zip）（新規登録時は必須。編集時は未選択なら既存ファイルを維持。アイコンは実行ファイルパスの.exeから自動取得されます）" FontWeight="Bold" TextWrapping="Wrap" />
             <Grid Margin="0,2,0,10">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
@@ -39,16 +39,6 @@
 
             <CheckBox Content="このツールを無効化する（一般ユーザーの一覧に表示しない）"
                       IsChecked="{Binding IsDisabled}" Margin="0,0,0,10" />
-
-            <TextBlock Text="アイコンファイル（任意。未選択なら既存アイコンを維持）" FontWeight="Bold" TextWrapping="Wrap" />
-            <Grid Margin="0,2,0,10">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-                <Button Grid.Column="0" Content="ファイルを選択" Padding="8,4" Click="OnSelectIconClick" />
-                <TextBlock Grid.Column="1" Text="{Binding IconFilePath}" VerticalAlignment="Center" Margin="8,0,0,0" TextTrimming="CharacterEllipsis" />
-            </Grid>
 
             <TextBlock Text="{Binding ErrorMessage}" Foreground="Red" TextWrapping="Wrap" Margin="0,4,0,10"
                        Visibility="{Binding ErrorMessage, Converter={StaticResource NullToVisibilityConverter}}" />

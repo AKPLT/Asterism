@@ -4,10 +4,16 @@
     <ProjectReference Include="..\..\shared\Asterism.Shared\Asterism.Shared.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="System.Drawing.Common" Version="8.0.10" />
+  </ItemGroup>
+
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <!-- サーバーはWindows上でのみ運用する前提（アイコン自動抽出でSystem.Drawing.Commonを使用） -->
+    <NoWarn>CA1416</NoWarn>
   </PropertyGroup>
 
 </Project>

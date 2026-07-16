@@ -61,16 +61,16 @@ public sealed class AdminApiService : IAdminApiService
         return tools ?? new List<ToolEntry>();
     }
 
-    public async Task<ToolEntry> CreateToolAsync(ToolEntry metadata, string packageFilePath, string? iconFilePath, CancellationToken ct = default)
+    public async Task<ToolEntry> CreateToolAsync(ToolEntry metadata, string packageFilePath, CancellationToken ct = default)
     {
-        using var content = BuildFormContent(metadata, packageFilePath, iconFilePath);
+        using var content = BuildFormContent(metadata, packageFilePath);
         using var response = await SendAsync(HttpMethod.Post, "api/admin/tools", content, ct);
         return (await response.Content.ReadFromJsonAsync<ToolEntry>(JsonOptions, ct))!;
     }
 
-    public async Task<ToolEntry> UpdateToolAsync(string id, ToolEntry metadata, string? packageFilePath, string? iconFilePath, CancellationToken ct = default)
+    public async Task<ToolEntry> UpdateToolAsync(string id, ToolEntry metadata, string? packageFilePath, CancellationToken ct = default)
     {
-        using var content = BuildFormContent(metadata, packageFilePath, iconFilePath);
+        using var content = BuildFormContent(metadata, packageFilePath);
         using var response = await SendAsync(HttpMethod.Put, $"api/admin/tools/{id}", content, ct);
         return (await response.Content.ReadFromJsonAsync<ToolEntry>(JsonOptions, ct))!;
     }
@@ -81,7 +81,7 @@ public sealed class AdminApiService : IAdminApiService
         using var response = await SendAsync(HttpMethod.Delete, uri, null, ct);
     }
 
-    private static MultipartFormDataContent BuildFormContent(ToolEntry metadata, string? packageFilePath, string? iconFilePath)
+    private static MultipartFormDataContent BuildFormContent(ToolEntry metadata, string? packageFilePath)
     {
         var content = new MultipartFormDataContent
         {
@@ -91,11 +91,6 @@ public sealed class AdminApiService : IAdminApiService
         if (packageFilePath is not null)
         {
             content.Add(new StreamContent(File.OpenRead(packageFilePath)), "package", Path.GetFileName(packageFilePath));
-        }
-
-        if (iconFilePath is not null)
-        {
-            content.Add(new StreamContent(File.OpenRead(iconFilePath)), "icon", Path.GetFileName(iconFilePath));
         }
 
         return content;

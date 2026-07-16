@@ -21,23 +21,14 @@ public partial class AdminToolEditWindow : Window
         };
     }
 
-    public void Initialize(ToolEntry? existing) => _viewModel.Initialize(existing);
+    public void Initialize(ToolEntry? existing, string? initialPackagePath = null) =>
+        _viewModel.Initialize(existing, initialPackagePath);
 
     private void OnSelectPackageClick(object sender, RoutedEventArgs e)
     {
         var dialog = new OpenFileDialog { Filter = "ZIPファイル (*.zip)|*.zip" };
         if (dialog.ShowDialog() == true)
             _viewModel.PackageFilePath = dialog.FileName;
-    }
-
-    private void OnSelectIconClick(object sender, RoutedEventArgs e)
-    {
-        var dialog = new OpenFileDialog
-        {
-            Filter = "画像ファイル (*.png;*.jpg;*.jpeg;*.ico)|*.png;*.jpg;*.jpeg;*.ico"
-        };
-        if (dialog.ShowDialog() == true)
-            _viewModel.IconFilePath = dialog.FileName;
     }
 
     private void OnCancelClick(object sender, RoutedEventArgs e)

@@ -110,6 +110,7 @@ public partial class MainWindow : Window
         {
             var adminWindow = _serviceProvider.GetRequiredService<AdminWindow>();
             adminWindow.Owner = this;
+            adminWindow.Closed += (_, _) => Activate();
             adminWindow.Show();
         }
     }

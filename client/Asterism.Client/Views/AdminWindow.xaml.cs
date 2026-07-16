@@ -1,4 +1,6 @@
 using System.ComponentModel;
+using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -36,6 +38,36 @@ public partial class AdminWindow : Window
         if (editWindow.ShowDialog() == true)
         {
             await _viewModel.LoadCommand.ExecuteAsync(null);
+        }
+    }
+
+    private void OnWindowDragEnter(object sender, System.Windows.DragEventArgs e)
+    {
+        var hasZip = e.Data.GetDataPresent(System.Windows.DataFormats.FileDrop)
+            && ((string[])e.Data.GetData(System.Windows.DataFormats.FileDrop)!)
+                .Any(path => Path.GetExtension(path).Equals(".zip", StringComparison.OrdinalIgnoreCase));
+
+        e.Effects = hasZip ? System.Windows.DragDropEffects.Copy : System.Windows.DragDropEffects.None;
+        e.Handled = true;
+    }
+
+    private async void OnWindowDrop(object sender, System.Windows.DragEventArgs e)
+    {
+        if (!e.Data.GetDataPresent(System.Windows.DataFormats.FileDrop)) return;
+
+        var zipPaths = ((string[])e.Data.GetData(System.Windows.DataFormats.FileDrop)!)
+            .Where(path => Path.GetExtension(path).Equals(".zip", StringComparison.OrdinalIgnoreCase))
+            .ToList();
+
+        foreach (var zipPath in zipPaths)
+        {
+            var editWindow = _serviceProvider.GetRequiredService<AdminToolEditWindow>();
+            editWindow.Owner = this;
+            editWindow.Initialize(null, zipPath);
+            if (editWindow.ShowDialog() == true)
+            {
+                await _viewModel.LoadCommand.ExecuteAsync(null);
+            }
         }
     }
 
