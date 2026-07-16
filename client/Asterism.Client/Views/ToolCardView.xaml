@@ -44,8 +44,13 @@
             <StackPanel DockPanel.Dock="Top">
                 <DockPanel>
                     <Button DockPanel.Dock="Right" Command="{Binding ToggleFavoriteCommand}"
-                            Background="Transparent" BorderThickness="0" Padding="4,0,0,0" Cursor="Hand"
+                            Padding="4,0,0,0" Cursor="Hand"
                             VerticalAlignment="Top" FontSize="16">
+                        <Button.Template>
+                            <ControlTemplate TargetType="Button">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </ControlTemplate>
+                        </Button.Template>
                         <Button.Style>
                             <Style TargetType="Button">
                                 <Setter Property="Content" Value="☆" />
