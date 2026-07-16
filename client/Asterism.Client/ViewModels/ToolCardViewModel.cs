@@ -26,11 +26,16 @@ public partial class ToolCardViewModel : ObservableObject
     private InstalledToolRecord? _installedRecord;
 
     public ToolEntry Tool { get; private set; }
+    public Action<string>? OnTagClicked { get; set; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(PrimaryButtonLabel))]
+    [NotifyPropertyChangedFor(nameof(IsUpdateAvailable))]
     [NotifyCanExecuteChangedFor(nameof(UninstallCommand))]
     private ToolCardState state;
+
+    public bool IsUpdateAvailable => State == ToolCardState.UpdateAvailable;
+    public string VersionText => Tool.Version;
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(PrimaryActionCommand))]
@@ -80,6 +85,7 @@ public partial class ToolCardViewModel : ObservableObject
         OnPropertyChanged(nameof(Category));
         OnPropertyChanged(nameof(Tags));
         OnPropertyChanged(nameof(IconUrl));
+        OnPropertyChanged(nameof(VersionText));
         RefreshState();
     }
 
@@ -182,4 +188,7 @@ public partial class ToolCardViewModel : ObservableObject
     }
 
     private bool CanUninstall() => !IsBusy && State != ToolCardState.NotInstalled;
+
+    [RelayCommand]
+    private void SelectTag(string tag) => OnTagClicked?.Invoke(tag);
 }

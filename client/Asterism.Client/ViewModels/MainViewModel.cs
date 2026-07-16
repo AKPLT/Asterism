@@ -139,6 +139,7 @@ public partial class MainViewModel : ObservableObject
             if (card == null)
             {
                 card = new ToolCardViewModel(tool, _installService, _launchService, _uninstallService, _localStateService);
+                card.OnTagClicked = tag => SearchText = tag;
                 card.PropertyChanged += OnToolCardPropertyChanged;
                 AllTools.Add(card);
             }

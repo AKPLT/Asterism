@@ -7,14 +7,34 @@
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=vm:ToolCardViewModel}"
              Width="260" Margin="6">
-    <Border BorderBrush="#DDDDDD" BorderThickness="1" CornerRadius="6" Padding="12" Background="White">
+    <Border BorderThickness="1" CornerRadius="6" Padding="12" Background="White">
+        <Border.Style>
+            <Style TargetType="Border">
+                <Setter Property="BorderBrush" Value="#DDDDDD" />
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsUpdateAvailable}" Value="True">
+                        <Setter Property="BorderBrush" Value="#F59E0B" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </Border.Style>
         <StackPanel>
             <StackPanel Orientation="Horizontal">
                 <Image Source="{Binding IconUrl, Converter={StaticResource StringToImageSourceConverter}}"
                        Width="40" Height="40" Margin="0,0,8,0" />
-                <StackPanel VerticalAlignment="Center">
-                    <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="14" TextWrapping="Wrap" />
-                    <TextBlock Text="{Binding Category}" FontSize="11" Foreground="Gray" />
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Stretch">
+                    <DockPanel>
+                        <Border DockPanel.Dock="Right" Background="#F59E0B" CornerRadius="4" Padding="5,1" Margin="6,0,0,0"
+                                Visibility="{Binding IsUpdateAvailable, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <TextBlock Text="更新あり" FontSize="10" FontWeight="Bold" Foreground="White" />
+                        </Border>
+                        <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="14" TextWrapping="Wrap" />
+                    </DockPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding Category}" FontSize="11" Foreground="Gray" />
+                        <TextBlock Text=" · " FontSize="11" Foreground="Gray" />
+                        <TextBlock Text="{Binding VersionText, StringFormat='v{0}'}" FontSize="11" Foreground="Gray" />
+                    </StackPanel>
                 </StackPanel>
             </StackPanel>
 
@@ -29,9 +49,25 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Border Background="#EEEEEE" CornerRadius="8" Padding="6,2" Margin="0,0,4,4">
-                            <TextBlock Text="{Binding}" FontSize="10" />
-                        </Border>
+                        <Button Command="{Binding DataContext.SelectTagCommand,
+                                    RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                CommandParameter="{Binding}"
+                                Cursor="Hand" Margin="0,0,4,4"
+                                Background="Transparent" BorderThickness="0" Padding="0">
+                            <Border Background="#EEEEEE" CornerRadius="8" Padding="6,2">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsMouseOver,
+                                                RelativeSource={RelativeSource AncestorType=Button}}" Value="True">
+                                                <Setter Property="Background" Value="#D1D5DB" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <TextBlock Text="{Binding}" FontSize="10" />
+                            </Border>
+                        </Button>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
