@@ -6,6 +6,12 @@
         xmlns:views="clr-namespace:Asterism.Client.Views"
         mc:Ignorable="d"
         Title="Asterism" Height="640" Width="1000">
+    <DockPanel>
+    <Menu DockPanel.Dock="Top">
+        <MenuItem Header="ツール">
+            <MenuItem Header="管理者モード" Click="OnAdminModeClick" />
+        </MenuItem>
+    </Menu>
     <Grid Margin="12">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -17,8 +23,6 @@
         <!-- ヘッダー: タイトル + 検索 + 更新確認 -->
         <DockPanel Grid.Row="0" Margin="0,0,0,8">
             <TextBlock Text="Asterism" FontSize="22" FontWeight="Bold" VerticalAlignment="Center" DockPanel.Dock="Left" />
-            <Button Content="管理者モード" DockPanel.Dock="Right" Padding="10,4" Margin="8,0,0,0"
-                    Click="OnAdminModeClick" />
             <Button Content="更新を確認" DockPanel.Dock="Right" Padding="10,4" Margin="8,0,0,0"
                     Command="{Binding RefreshManifestCommand}" />
             <TextBlock Text="検索:" DockPanel.Dock="Left" Margin="24,0,4,0" VerticalAlignment="Center" />
@@ -88,4 +92,5 @@
                        FontSize="11" Foreground="Gray" TextTrimming="CharacterEllipsis" />
         </DockPanel>
     </Grid>
+    </DockPanel>
 </Window>
