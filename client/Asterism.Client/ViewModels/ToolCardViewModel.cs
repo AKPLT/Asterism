@@ -132,10 +132,9 @@ public partial class ToolCardViewModel : ObservableObject
             return;
         }
 
-        var installedVersion = Version.TryParse(_installedRecord.Version, out var iv) ? iv : new Version(0, 0, 0);
-        var manifestVersion = Version.TryParse(Tool.Version, out var mv) ? mv : new Version(0, 0, 0);
-
-        State = manifestVersion > installedVersion ? ToolCardState.UpdateAvailable : ToolCardState.Installed;
+        State = string.Equals(Tool.Version, _installedRecord.Version, StringComparison.Ordinal)
+            ? ToolCardState.Installed
+            : ToolCardState.UpdateAvailable;
     }
 
     [RelayCommand(CanExecute = nameof(CanPrimaryAction))]
