@@ -16,7 +16,8 @@
         </Grid.RowDefinitions>
 
         <DockPanel Grid.Row="0" Margin="0,0,0,8">
-            <Button Content="新規登録" DockPanel.Dock="Right" Padding="10,4" Click="OnAddNewClick" />
+            <Button Content="新規登録" DockPanel.Dock="Right" Padding="10,4" Click="OnAddNewClick"
+                    Style="{StaticResource PrimaryButton}" />
             <Button Content="更新" DockPanel.Dock="Right" Padding="10,4" Margin="0,0,8,0" Command="{Binding LoadCommand}" />
             <TextBlock Text="検索:" DockPanel.Dock="Left" Margin="24,0,4,0" VerticalAlignment="Center" />
             <Grid>
@@ -45,7 +46,8 @@
                      ItemsSource="{Binding Categories}"
                      SelectedItem="{Binding SelectedCategory}" />
 
-            <ListView Grid.Column="1" ItemsSource="{Binding ToolsView}">
+            <ListView Grid.Column="1" ItemsSource="{Binding ToolsView}"
+                      GridViewColumnHeader.Click="OnColumnHeaderClick">
                 <ListView.View>
                     <GridView>
                         <GridViewColumn Header="ID" Width="160" DisplayMemberBinding="{Binding Id}" />
@@ -57,7 +59,8 @@
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal">
                                         <Button Content="編集" Padding="8,2" Click="OnEditClick" Tag="{Binding}" />
-                                        <Button Content="削除" Padding="8,2" Margin="4,0,0,0" Click="OnDeleteClick" Tag="{Binding}" />
+                                        <Button Content="削除" Padding="8,2" Margin="4,0,0,0" Click="OnDeleteClick" Tag="{Binding}"
+                                                Style="{StaticResource DangerButton}" />
                                     </StackPanel>
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>

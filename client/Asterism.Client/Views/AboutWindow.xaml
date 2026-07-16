@@ -13,7 +13,7 @@
 
         <!-- アプリ名・バージョン -->
         <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,16">
-            <Border Width="48" Height="48" CornerRadius="10" Background="#4F46E5" Margin="0,0,14,0">
+            <Border Width="48" Height="48" CornerRadius="10" Background="#268BD2" Margin="0,0,14,0">
                 <TextBlock Text="A" FontSize="26" FontWeight="Bold" Foreground="White"
                            HorizontalAlignment="Center" VerticalAlignment="Center" />
             </Border>
@@ -26,7 +26,7 @@
         <!-- 説明 -->
         <StackPanel Grid.Row="1" Margin="0,0,0,16">
             <TextBlock Text="社内ツールのダウンロード・更新・起動を一元管理するポータルアプリです。"
-                       TextWrapping="Wrap" Foreground="#444444" LineHeight="20" />
+                       TextWrapping="Wrap" LineHeight="20" />
         </StackPanel>
 
         <!-- 閉じるボタン -->

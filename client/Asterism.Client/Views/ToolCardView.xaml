@@ -7,13 +7,13 @@
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=vm:ToolCardViewModel}"
              Width="380" Margin="6">
-    <Border BorderThickness="1" CornerRadius="6" Background="White" Padding="10">
+    <Border BorderThickness="1" CornerRadius="6" Background="{StaticResource SurfaceBg}" Padding="10">
         <Border.Style>
             <Style TargetType="Border">
-                <Setter Property="BorderBrush" Value="#DDDDDD" />
+                <Setter Property="BorderBrush" Value="{StaticResource BorderColor}" />
                 <Style.Triggers>
                     <DataTrigger Binding="{Binding IsUpdateAvailable}" Value="True">
-                        <Setter Property="BorderBrush" Value="#F59E0B" />
+                        <Setter Property="BorderBrush" Value="{StaticResource Sol.Yellow}" />
                     </DataTrigger>
                 </Style.Triggers>
             </Style>
@@ -62,12 +62,12 @@
                             </Style>
                         </Button.Style>
                     </Button>
-                    <Border DockPanel.Dock="Right" Background="#F59E0B" CornerRadius="4" Padding="5,1" Margin="4,0,4,0"
+                    <Border DockPanel.Dock="Right" Background="{StaticResource Sol.Yellow}" CornerRadius="4" Padding="5,1" Margin="4,0,4,0"
                             VerticalAlignment="Center"
                             Visibility="{Binding IsUpdateAvailable, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <TextBlock Text="更新あり" FontSize="10" FontWeight="Bold" Foreground="White" />
                     </Border>
-                    <Border DockPanel.Dock="Right" Background="#059669" CornerRadius="4" Padding="5,1" Margin="4,0,4,0"
+                    <Border DockPanel.Dock="Right" Background="{StaticResource Sol.Cyan}" CornerRadius="4" Padding="5,1" Margin="4,0,4,0"
                             VerticalAlignment="Center"
                             Visibility="{Binding IsLatest, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <TextBlock Text="最新" FontSize="10" FontWeight="Bold" Foreground="White" />
@@ -84,7 +84,7 @@
                 </StackPanel>
 
                 <!-- 説明 (1行) -->
-                <TextBlock Text="{Binding Description}" FontSize="11" Foreground="#555555"
+                <TextBlock Text="{Binding Description}" FontSize="11" Foreground="{StaticResource FgBody}"
                            TextTrimming="CharacterEllipsis" Margin="0,3,0,0"
                            MaxHeight="18" />
 
@@ -102,13 +102,13 @@
                                     CommandParameter="{Binding}"
                                     Cursor="Hand" Margin="0,0,4,2"
                                     Background="Transparent" BorderThickness="0" Padding="0">
-                                <Border Background="#EEEEEE" CornerRadius="8" Padding="6,1">
+                                <Border Background="{StaticResource TagBg}" CornerRadius="8" Padding="6,1">
                                     <Border.Style>
                                         <Style TargetType="Border">
                                             <Style.Triggers>
                                                 <DataTrigger Binding="{Binding IsMouseOver,
                                                     RelativeSource={RelativeSource AncestorType=Button}}" Value="True">
-                                                    <Setter Property="Background" Value="#D1D5DB" />
+                                                    <Setter Property="Background" Value="{StaticResource HoverBg}" />
                                                 </DataTrigger>
                                             </Style.Triggers>
                                         </Style>
@@ -134,9 +134,11 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <Button Grid.Column="0" Content="{Binding PrimaryButtonLabel}"
-                            Command="{Binding PrimaryActionCommand}" Padding="0,4" FontSize="12" />
+                            Command="{Binding PrimaryActionCommand}" Padding="0,4" FontSize="12"
+                            Style="{StaticResource ToolCardPrimaryButton}" />
                     <Button Grid.Column="1" Content="アンインストール" Margin="6,0,0,0" Padding="8,4" FontSize="12"
-                            Command="{Binding UninstallCommand}" />
+                            Command="{Binding UninstallCommand}"
+                            Style="{StaticResource DangerButton}" />
                 </Grid>
 
             </StackPanel>

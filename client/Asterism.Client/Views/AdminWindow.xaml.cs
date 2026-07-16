@@ -1,4 +1,7 @@
+using System.ComponentModel;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
 using Asterism.Client.Services;
 using Asterism.Client.ViewModels;
 using Asterism.Shared.Models;
@@ -58,5 +61,34 @@ public partial class AdminWindow : Window
     {
         var win = new AdminHelpWindow { Owner = this };
         win.Show();
+    }
+
+    private GridViewColumnHeader? _lastSortHeader;
+    private ListSortDirection _lastSortDir = ListSortDirection.Ascending;
+
+    private void OnColumnHeaderClick(object sender, RoutedEventArgs e)
+    {
+        if (e.OriginalSource is not GridViewColumnHeader header || header.Column is null) return;
+
+        var property = (header.Column.DisplayMemberBinding as Binding)?.Path.Path;
+        if (property is null) return;
+
+        if (header == _lastSortHeader)
+        {
+            _lastSortDir = _lastSortDir == ListSortDirection.Ascending
+                ? ListSortDirection.Descending
+                : ListSortDirection.Ascending;
+        }
+        else
+        {
+            if (_lastSortHeader != null) _lastSortHeader.Tag = null;
+            _lastSortDir = ListSortDirection.Ascending;
+        }
+
+        header.Tag = _lastSortDir == ListSortDirection.Ascending ? "asc" : "desc";
+        _lastSortHeader = header;
+
+        _viewModel.ToolsView.SortDescriptions.Clear();
+        _viewModel.ToolsView.SortDescriptions.Add(new SortDescription(property, _lastSortDir));
     }
 }

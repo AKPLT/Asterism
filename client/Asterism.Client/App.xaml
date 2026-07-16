@@ -4,9 +4,14 @@
              xmlns:local="clr-namespace:Asterism.Client"
              xmlns:conv="clr-namespace:Asterism.Client.Converters">
     <Application.Resources>
-        <conv:StringToImageSourceConverter x:Key="StringToImageSourceConverter" />
-        <conv:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
-        <conv:StringToBrushConverter x:Key="StringToBrushConverter" />
-        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Themes/SolarizedDark.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            <conv:StringToImageSourceConverter x:Key="StringToImageSourceConverter" />
+            <conv:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
+            <conv:StringToBrushConverter x:Key="StringToBrushConverter" />
+            <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+        </ResourceDictionary>
     </Application.Resources>
 </Application>

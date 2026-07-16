@@ -28,7 +28,8 @@
         <!-- ヘッダー: 検索 + 並び替え + 更新確認 -->
         <DockPanel Grid.Row="0" Margin="0,0,0,8">
             <Button Content="更新を確認" DockPanel.Dock="Right" Padding="10,4" Margin="8,0,0,0"
-                    Command="{Binding RefreshManifestCommand}" />
+                    Command="{Binding RefreshManifestCommand}"
+                    Style="{StaticResource PrimaryButton}" />
             <ComboBox DockPanel.Dock="Right" MinWidth="100" Padding="4,2" Margin="4,0,0,0"
                       VerticalContentAlignment="Center"
                       ItemsSource="{Binding SortOptionLabels, Mode=OneTime}"
@@ -53,10 +54,10 @@
                 Visibility="{Binding BannerMessage, Converter={StaticResource NullToVisibilityConverter}, FallbackValue=Collapsed}">
             <Border.Style>
                 <Style TargetType="Border">
-                    <Setter Property="Background" Value="#FFF3CD" />
+                    <Setter Property="Background" Value="#2A2000" />
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding IsBannerError}" Value="True">
-                            <Setter Property="Background" Value="#F8D7DA" />
+                            <Setter Property="Background" Value="#2D0B0B" />
                         </DataTrigger>
                     </Style.Triggers>
                 </Style>
