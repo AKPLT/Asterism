@@ -1,7 +1,6 @@
 using System.Windows;
 using Asterism.Client.ViewModels;
 using Asterism.Shared.Models;
-using Microsoft.Win32;
 
 namespace Asterism.Client.Views;
 
@@ -26,17 +25,9 @@ public partial class AdminToolEditWindow : Window
 
     private void OnSelectPackageClick(object sender, RoutedEventArgs e)
     {
-        var dialog = new OpenFileDialog
-        {
-            Filter = _viewModel.PackageType == PackageType.Zip
-                ? "ZIPファイル (*.zip)|*.zip"
-                : "インストーラー (*.exe;*.msi)|*.exe;*.msi"
-        };
-
+        var dialog = new OpenFileDialog { Filter = "ZIPファイル (*.zip)|*.zip" };
         if (dialog.ShowDialog() == true)
-        {
             _viewModel.PackageFilePath = dialog.FileName;
-        }
     }
 
     private void OnSelectIconClick(object sender, RoutedEventArgs e)
@@ -45,11 +36,8 @@ public partial class AdminToolEditWindow : Window
         {
             Filter = "画像ファイル (*.png;*.jpg;*.jpeg;*.ico)|*.png;*.jpg;*.jpeg;*.ico"
         };
-
         if (dialog.ShowDialog() == true)
-        {
             _viewModel.IconFilePath = dialog.FileName;
-        }
     }
 
     private void OnCancelClick(object sender, RoutedEventArgs e)

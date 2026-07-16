@@ -1,5 +1,3 @@
-using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Net.Http;
@@ -29,24 +27,12 @@ public sealed class InstallService : IInstallService
     public async Task<InstalledToolRecord> InstallOrUpdateAsync(
         ToolEntry tool, IProgress<double> progress, CancellationToken ct = default)
     {
-        // Installer型はUseShellExecute=trueで実行するため、シェルが実行方式を判別できるよう
-        // 拡張子(.exe/.msi等)を維持したファイル名でダウンロードする（.tmpのままだと起動に失敗する）。
-        var tempExtension = tool.PackageType == PackageType.Installer
-            ? (Path.GetExtension(tool.DownloadUrl) is { Length: > 0 } ext ? ext : ".exe")
-            : ".tmp";
-        var tempFilePath = Path.Combine(_downloadsDirectory, $"{tool.Id}-{tool.Version}{tempExtension}");
+        var tempFilePath = Path.Combine(_downloadsDirectory, $"{tool.Id}-{tool.Version}.tmp");
 
         try
         {
             await DownloadAsync(tool.DownloadUrl, tempFilePath, progress, ct);
-
-            InstalledToolRecord record = tool.PackageType switch
-            {
-                PackageType.Zip => InstallZip(tool, tempFilePath),
-                PackageType.Installer => await RunInstallerAsync(tool, tempFilePath, ct),
-                _ => throw new NotSupportedException($"未対応のpackageTypeです: {tool.PackageType}")
-            };
-
+            var record = InstallZip(tool, tempFilePath);
             _localStateService.Upsert(record);
             return record;
         }
@@ -54,15 +40,9 @@ public sealed class InstallService : IInstallService
         {
             try
             {
-                if (File.Exists(tempFilePath))
-                {
-                    File.Delete(tempFilePath);
-                }
+                if (File.Exists(tempFilePath)) File.Delete(tempFilePath);
             }
-            catch (IOException)
-            {
-                // 一時ファイル削除の失敗は致命的ではないため無視する
-            }
+            catch (IOException) { }
         }
     }
 
@@ -89,9 +69,7 @@ public sealed class InstallService : IInstallService
                 await fileStream.WriteAsync(buffer.AsMemory(0, read), ct);
                 readTotal += read;
                 if (totalBytes is > 0)
-                {
                     progress.Report((double)readTotal / totalBytes.Value);
-                }
             }
         }
         catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
@@ -108,9 +86,7 @@ public sealed class InstallService : IInstallService
         var stagingDir = Path.Combine(stagingRoot, $"{tool.Id}-{tool.Version}");
 
         if (Directory.Exists(stagingDir))
-        {
             Directory.Delete(stagingDir, recursive: true);
-        }
 
         try
         {
@@ -119,63 +95,37 @@ public sealed class InstallService : IInstallService
         catch (InvalidDataException ex)
         {
             if (Directory.Exists(stagingDir))
-            {
                 Directory.Delete(stagingDir, recursive: true);
-            }
             throw new PackageCorruptException("パッケージが破損しています。", ex);
         }
 
-        // 展開成功後にのみ既存インストールを置き換える（更新失敗時に既存動作を壊さないため）
+        // ZIP内にトップレベルのフォルダが1つだけある場合はそのフォルダを剥がす
+        StripSingleTopLevelDirectory(stagingDir);
+
         if (Directory.Exists(finalDir))
-        {
             Directory.Delete(finalDir, recursive: true);
-        }
         Directory.Move(stagingDir, finalDir);
 
         return new InstalledToolRecord
         {
             Id = tool.Id,
             Version = tool.Version,
-            PackageType = PackageType.Zip,
             InstallPath = finalDir,
             InstalledAt = DateTimeOffset.Now
         };
     }
 
-    private static async Task<InstalledToolRecord> RunInstallerAsync(ToolEntry tool, string installerFilePath, CancellationToken ct)
+    private static void StripSingleTopLevelDirectory(string dir)
     {
-        try
-        {
-            var startInfo = new ProcessStartInfo
-            {
-                FileName = installerFilePath,
-                Arguments = tool.InstallerArgs ?? "",
-                UseShellExecute = true
-            };
+        var entries = Directory.GetFileSystemEntries(dir);
+        if (entries.Length != 1) return;
 
-            using var process = Process.Start(startInfo)
-                ?? throw new InstallerFailedException("インストーラーの起動に失敗しました。");
+        var singleEntry = entries[0];
+        if (!Directory.Exists(singleEntry)) return;
 
-            await process.WaitForExitAsync(ct);
-
-            if (process.ExitCode != 0)
-            {
-                throw new InstallerFailedException(
-                    $"インストーラーが正常終了しませんでした（終了コード: {process.ExitCode}）。", process.ExitCode);
-            }
-        }
-        catch (Win32Exception ex)
-        {
-            throw new InstallerFailedException("インストーラーの実行が許可されませんでした。", inner: ex);
-        }
-
-        return new InstalledToolRecord
-        {
-            Id = tool.Id,
-            Version = tool.Version,
-            PackageType = PackageType.Installer,
-            InstallPath = Environment.ExpandEnvironmentVariables(tool.ExecutablePath),
-            InstalledAt = DateTimeOffset.Now
-        };
+        var temp = dir + "_strip";
+        Directory.Move(singleEntry, temp);
+        Directory.Delete(dir);
+        Directory.Move(temp, dir);
     }
 }

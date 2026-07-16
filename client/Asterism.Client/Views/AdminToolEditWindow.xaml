@@ -1,11 +1,11 @@
 <Window x:Class="Asterism.Client.Views.AdminToolEditWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="{Binding WindowTitle}" Height="620" Width="480"
+        Title="{Binding WindowTitle}" Height="580" Width="480"
         WindowStartupLocation="CenterOwner">
     <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="16">
         <StackPanel>
-            <TextBlock Text="パッケージファイル（新規登録時は必須。編集時は未選択なら既存ファイルを維持）" FontWeight="Bold" TextWrapping="Wrap" />
+            <TextBlock Text="パッケージファイル（.zip）（新規登録時は必須。編集時は未選択なら既存ファイルを維持）" FontWeight="Bold" TextWrapping="Wrap" />
             <DockPanel Margin="0,2,0,10">
                 <Button Content="選択..." DockPanel.Dock="Right" Padding="8,4" Click="OnSelectPackageClick" />
                 <TextBlock Text="{Binding PackageFilePath}" VerticalAlignment="Center" Margin="0,0,8,0" TextTrimming="CharacterEllipsis" />
@@ -30,14 +30,11 @@
             <TextBlock Text="タグ（カンマ区切り）" FontWeight="Bold" />
             <TextBox Text="{Binding TagsText, UpdateSourceTrigger=PropertyChanged}" Margin="0,2,0,10" Padding="4" />
 
-            <TextBlock Text="配布形式" FontWeight="Bold" />
-            <ComboBox ItemsSource="{Binding PackageTypeValues}" SelectedItem="{Binding PackageType}" Margin="0,2,0,10" Padding="4" />
-
-            <TextBlock Text="実行ファイルパス（Zip型:相対パス / Installer型:絶対パス、環境変数展開可）" FontWeight="Bold" TextWrapping="Wrap" />
+            <TextBlock Text="実行ファイルパス（展開後フォルダからの相対パス）" FontWeight="Bold" TextWrapping="Wrap" />
             <TextBox Text="{Binding ExecutablePath, UpdateSourceTrigger=PropertyChanged}" Margin="0,2,0,10" Padding="4" />
 
-            <TextBlock Text="インストーラー引数（Installer型のみ、任意）" FontWeight="Bold" />
-            <TextBox Text="{Binding InstallerArgs, UpdateSourceTrigger=PropertyChanged}" Margin="0,2,0,10" Padding="4" />
+            <CheckBox Content="このツールを無効化する（一般ユーザーの一覧に表示しない）"
+                      IsChecked="{Binding IsDisabled}" Margin="0,0,0,10" />
 
             <TextBlock Text="アイコンファイル（任意。未選択なら既存アイコンを維持）" FontWeight="Bold" TextWrapping="Wrap" />
             <DockPanel Margin="0,2,0,10">

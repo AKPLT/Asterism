@@ -27,10 +27,15 @@ public partial class MainViewModel : ObservableObject
     private readonly IUninstallService _uninstallService;
     private readonly DispatcherTimer _pollingTimer;
     private bool _isShowingConnectionBanner;
+    private int _lastKnownUpdateCount;
+
+    public event Action<int>? UpdatesDetected;
 
     public ObservableCollection<ToolCardViewModel> AllTools { get; } = new();
     public ObservableCollection<string> Categories { get; } = new() { AllCategoriesLabel };
     public ICollectionView ToolsView { get; }
+
+    public string[] SortOptionLabels { get; } = ["名前順", "カテゴリ順", "更新あり優先"];
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasSearchText))]
@@ -53,6 +58,9 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private bool isBannerError;
 
+    [ObservableProperty]
+    private string selectedSortLabel = "名前順";
+
     public MainViewModel(
         IManifestService manifestService,
         ILocalStateService localStateService,
@@ -72,12 +80,32 @@ public partial class MainViewModel : ObservableObject
 
         ToolsView = CollectionViewSource.GetDefaultView(AllTools);
         ToolsView.Filter = FilterPredicate;
+        ToolsView.SortDescriptions.Add(new SortDescription(nameof(ToolCardViewModel.Name), ListSortDirection.Ascending));
 
         _pollingTimer = new DispatcherTimer
         {
             Interval = TimeSpan.FromMinutes(Math.Max(1, options.Value.PollingIntervalMinutes))
         };
         _pollingTimer.Tick += async (_, _) => await RefreshManifestCoreAsync(isBackground: true);
+    }
+
+    partial void OnSelectedSortLabelChanged(string value)
+    {
+        ToolsView.SortDescriptions.Clear();
+        switch (value)
+        {
+            case "カテゴリ順":
+                ToolsView.SortDescriptions.Add(new SortDescription(nameof(ToolCardViewModel.Category), ListSortDirection.Ascending));
+                ToolsView.SortDescriptions.Add(new SortDescription(nameof(ToolCardViewModel.Name), ListSortDirection.Ascending));
+                break;
+            case "更新あり優先":
+                ToolsView.SortDescriptions.Add(new SortDescription(nameof(ToolCardViewModel.State), ListSortDirection.Descending));
+                ToolsView.SortDescriptions.Add(new SortDescription(nameof(ToolCardViewModel.Name), ListSortDirection.Ascending));
+                break;
+            default:
+                ToolsView.SortDescriptions.Add(new SortDescription(nameof(ToolCardViewModel.Name), ListSortDirection.Ascending));
+                break;
+        }
     }
 
     [RelayCommand]
@@ -192,9 +220,15 @@ public partial class MainViewModel : ObservableObject
 
     private void UpdateBannerForToolStates()
     {
-        var updateCount = AllTools.Count(c => c.State == ToolCardState.UpdateAvailable);
+        var updateCount = AllTools.Count(c => c.State == ToolCardState.UpdateAvailable && !c.Tool.IsDisabled);
         BannerMessage = updateCount > 0 ? $"{updateCount}件のツールに更新があります。" : null;
         IsBannerError = false;
+
+        if (updateCount > _lastKnownUpdateCount)
+        {
+            UpdatesDetected?.Invoke(updateCount);
+        }
+        _lastKnownUpdateCount = updateCount;
     }
 
     private void RebuildCategories()
@@ -202,9 +236,10 @@ public partial class MainViewModel : ObservableObject
         var current = SelectedCategory;
 
         Categories.Clear();
-        var builtList = ToolFilter.BuildCategoryList(AllTools.Select(c => c.Category));
+        var builtList = ToolFilter.BuildCategoryList(AllTools.Where(c => !c.Tool.IsDisabled).Select(c => c.Category));
         Categories.Add(builtList[0]); // "すべて"
         Categories.Add(ToolFilter.FavoritesLabel);
+        Categories.Add(ToolFilter.InstalledLabel);
         for (var i = 1; i < builtList.Count; i++)
             Categories.Add(builtList[i]);
 
@@ -251,8 +286,15 @@ public partial class MainViewModel : ObservableObject
     private bool FilterPredicate(object obj)
     {
         if (obj is not ToolCardViewModel card) return false;
+        if (card.Tool.IsDisabled) return false;
+
         if (SelectedCategory == ToolFilter.FavoritesLabel)
             return card.IsFavorite && ToolFilter.Matches(card.Tool, SearchText, AllCategoriesLabel);
+
+        if (SelectedCategory == ToolFilter.InstalledLabel)
+            return card.State != ToolCardState.NotInstalled
+                && ToolFilter.Matches(card.Tool, SearchText, AllCategoriesLabel);
+
         return ToolFilter.Matches(card.Tool, SearchText, SelectedCategory);
     }
 }

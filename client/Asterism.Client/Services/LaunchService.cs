@@ -17,9 +17,7 @@ public sealed class LaunchService : ILaunchService
 
     public void Launch(ToolEntry tool, InstalledToolRecord record)
     {
-        var exePath = record.PackageType == PackageType.Zip
-            ? Path.Combine(record.InstallPath, tool.ExecutablePath)
-            : Environment.ExpandEnvironmentVariables(record.InstallPath);
+        var exePath = Path.Combine(record.InstallPath, tool.ExecutablePath);
 
         if (!File.Exists(exePath))
         {
@@ -27,12 +25,10 @@ public sealed class LaunchService : ILaunchService
             throw new LaunchFailedException("実行ファイルが見つかりません。再インストールしてください。");
         }
 
-        var startInfo = new ProcessStartInfo(exePath)
+        Process.Start(new ProcessStartInfo(exePath)
         {
             UseShellExecute = true,
             WorkingDirectory = Path.GetDirectoryName(exePath) ?? ""
-        };
-
-        Process.Start(startInfo);
+        });
     }
 }

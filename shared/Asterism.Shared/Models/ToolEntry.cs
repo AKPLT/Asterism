@@ -12,5 +12,7 @@ public sealed class ToolEntry
     public string DownloadUrl { get; set; } = "";
     public PackageType PackageType { get; set; }
     public string ExecutablePath { get; set; } = "";
-    public string? InstallerArgs { get; set; }
+    public bool IsDisabled { get; set; } = false;
+    public DateTimeOffset? CreatedAt { get; set; }
+    public DateTimeOffset? UpdatedAt { get; set; }
 }

@@ -210,5 +210,5 @@ dotnet publish -c Release -r win-x64 --self-contained -o publish\
 | **通信** | 現状HTTPのみ。社内LANのみの利用であればそのままでOK。外部公開する場合はIIS/nginxでリバースプロキシ＋HTTPS化を推奨 |
 | **管理者パスワード** | 管理者のみが知る運用とし、クライアントのappsettings.jsonには記載しない |
 | **wwwrootのバックアップ** | `wwwroot/` 以下（manifest.json・tools/・icons/）が全資産。定期的にバックアップしてください |
-| **クライアントの自己更新** | 現状、クライアントEXE自体の自動更新機能はありません。更新時は再配布が必要です |
+| **クライアントの自己更新** | ツールID `tool-asterism-client`（Zip型）をAsterismに登録し、クライアントEXE入りZIPを配布すると、管理者がバージョンを上げたときに一般ユーザーへ更新通知が届き、カードの「更新」ボタンでダウンロード→再起動の流れで自動適用できます |
 | **ポート変更** | `appsettings.json` の `Kestrel:Endpoints:Http:Url` または起動引数 `--urls` で変更できます |

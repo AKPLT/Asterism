@@ -20,12 +20,16 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <!-- ヘッダー: タイトル + 検索 + 更新確認 -->
+        <!-- ヘッダー: 検索 + 並び替え + 更新確認 -->
         <DockPanel Grid.Row="0" Margin="0,0,0,8">
-            <TextBlock Text="Asterism" FontSize="22" FontWeight="Bold" VerticalAlignment="Center" DockPanel.Dock="Left" />
             <Button Content="更新を確認" DockPanel.Dock="Right" Padding="10,4" Margin="8,0,0,0"
                     Command="{Binding RefreshManifestCommand}" />
-            <TextBlock Text="検索:" DockPanel.Dock="Left" Margin="24,0,4,0" VerticalAlignment="Center" />
+            <ComboBox DockPanel.Dock="Right" MinWidth="100" Padding="4,2" Margin="4,0,0,0"
+                      VerticalContentAlignment="Center"
+                      ItemsSource="{Binding SortOptionLabels, Mode=OneTime}"
+                      SelectedItem="{Binding SelectedSortLabel}" />
+            <TextBlock DockPanel.Dock="Right" Text="並び替え:" Margin="0,0,4,0" VerticalAlignment="Center" />
+            <TextBlock Text="検索:" DockPanel.Dock="Left" Margin="0,0,4,0" VerticalAlignment="Center" />
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />

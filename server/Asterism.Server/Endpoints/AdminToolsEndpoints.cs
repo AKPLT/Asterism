@@ -47,9 +47,7 @@ public static class AdminToolsEndpoints
         HttpRequest request, ManifestStore store, IWebHostEnvironment env, CancellationToken ct)
     {
         if (!request.HasFormContentType)
-        {
             return Results.BadRequest("multipart/form-data で送信してください。");
-        }
 
         var form = await request.ReadFormAsync(ct);
         ToolEntry? entry;
@@ -63,34 +61,29 @@ public static class AdminToolsEndpoints
         }
 
         if (entry is null || string.IsNullOrWhiteSpace(entry.Id))
-        {
             return Results.BadRequest("id は必須です。");
-        }
 
         if (!IsSafeSegment(entry.Id) || !IsSafeSegment(entry.Version))
-        {
             return Results.BadRequest("idとversionは英数字・ハイフン・アンダースコア・ドットのみ使用できます。");
-        }
 
         var package = form.Files["package"];
         if (package is null || package.Length == 0)
-        {
             return Results.BadRequest("packageファイルは必須です。");
-        }
 
-        var validationError = ValidatePackageExtension(entry.PackageType, package.FileName);
-        if (validationError is not null)
-        {
-            return Results.BadRequest(validationError);
-        }
+        if (!Path.GetExtension(package.FileName).Equals(".zip", StringComparison.OrdinalIgnoreCase))
+            return Results.BadRequest("パッケージファイルは .zip のみ許可されます。");
 
-        var ext = Path.GetExtension(package.FileName).ToLowerInvariant();
-        var packageFileName = $"{entry.Id}-{entry.Version}{ext}";
+        var packageFileName = $"{entry.Id}-{entry.Version}.zip";
         await SaveFileAsync(package, Path.Combine(env.WebRootPath, "tools"), packageFileName, ct);
         entry.DownloadUrl = $"tools/{packageFileName}";
+        entry.PackageType = PackageType.Zip;
 
         var icon = form.Files["icon"];
         entry.IconUrl = icon is { Length: > 0 } ? await SaveIconAsync(icon, env, entry.Id, ct) : "";
+
+        var now = DateTimeOffset.UtcNow;
+        entry.CreatedAt = now;
+        entry.UpdatedAt = now;
 
         try
         {
@@ -107,9 +100,7 @@ public static class AdminToolsEndpoints
         string id, HttpRequest request, ManifestStore store, IWebHostEnvironment env, CancellationToken ct)
     {
         if (!request.HasFormContentType)
-        {
             return Results.BadRequest("multipart/form-data で送信してください。");
-        }
 
         var form = await request.ReadFormAsync(ct);
         ToolEntry? entry;
@@ -123,45 +114,34 @@ public static class AdminToolsEndpoints
         }
 
         if (entry is null || !IsSafeSegment(entry.Version))
-        {
             return Results.BadRequest("versionは英数字・ハイフン・アンダースコア・ドットのみ使用できます。");
-        }
 
         entry.Id = id;
+        entry.PackageType = PackageType.Zip;
 
         var package = form.Files["package"];
         if (package is { Length: > 0 })
         {
-            var validationError = ValidatePackageExtension(entry.PackageType, package.FileName);
-            if (validationError is not null)
-            {
-                return Results.BadRequest(validationError);
-            }
+            if (!Path.GetExtension(package.FileName).Equals(".zip", StringComparison.OrdinalIgnoreCase))
+                return Results.BadRequest("パッケージファイルは .zip のみ許可されます。");
 
-            var ext = Path.GetExtension(package.FileName).ToLowerInvariant();
-            var packageFileName = $"{id}-{entry.Version}{ext}";
+            var packageFileName = $"{id}-{entry.Version}.zip";
             await SaveFileAsync(package, Path.Combine(env.WebRootPath, "tools"), packageFileName, ct);
             entry.DownloadUrl = $"tools/{packageFileName}";
         }
 
         var icon = form.Files["icon"];
         if (icon is { Length: > 0 })
-        {
             entry.IconUrl = await SaveIconAsync(icon, env, id, ct);
-        }
 
         try
         {
             var updated = await store.UpdateToolAsync(id, existing =>
             {
-                if (package is not { Length: > 0 })
-                {
-                    entry.DownloadUrl = existing.DownloadUrl;
-                }
-                if (icon is not { Length: > 0 })
-                {
-                    entry.IconUrl = existing.IconUrl;
-                }
+                if (package is not { Length: > 0 }) entry.DownloadUrl = existing.DownloadUrl;
+                if (icon is not { Length: > 0 }) entry.IconUrl = existing.IconUrl;
+                entry.CreatedAt = existing.CreatedAt;
+                entry.UpdatedAt = DateTimeOffset.UtcNow;
                 return entry;
             }, ct);
             return Results.Ok(updated);
@@ -170,17 +150,6 @@ public static class AdminToolsEndpoints
         {
             return Results.NotFound(ex.Message);
         }
-    }
-
-    private static string? ValidatePackageExtension(PackageType packageType, string fileName)
-    {
-        var ext = Path.GetExtension(fileName).ToLowerInvariant();
-        return packageType switch
-        {
-            PackageType.Zip when ext != ".zip" => "packageTypeがZipの場合、.zipのみ許可されます。",
-            PackageType.Installer when ext is not (".exe" or ".msi") => "packageTypeがInstallerの場合、.exeまたは.msiのみ許可されます。",
-            _ => null
-        };
     }
 
     private static async Task SaveFileAsync(IFormFile file, string directory, string fileName, CancellationToken ct)

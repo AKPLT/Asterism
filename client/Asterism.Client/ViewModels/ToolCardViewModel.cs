@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using Asterism.Client.Models;
@@ -149,6 +150,8 @@ public partial class ToolCardViewModel : ObservableObject
         }
     }
 
+    private const string SelfUpdateToolId = "tool-asterism-client";
+
     private async Task InstallOrUpdateInternalAsync(CancellationToken ct)
     {
         IsBusy = true;
@@ -160,6 +163,11 @@ public partial class ToolCardViewModel : ObservableObject
             var progress = new Progress<double>(p => ProgressPercent = p);
             _installedRecord = await _installService.InstallOrUpdateAsync(Tool, progress, ct);
             State = ToolCardState.Installed;
+
+            if (Tool.Id == SelfUpdateToolId)
+            {
+                OfferSelfUpdateRestart();
+            }
         }
         catch (PackageCorruptException ex)
         {
@@ -175,6 +183,40 @@ public partial class ToolCardViewModel : ObservableObject
         }
     }
 
+    private void OfferSelfUpdateRestart()
+    {
+        var newExePath = Path.Combine(_installedRecord!.InstallPath, Tool.ExecutablePath);
+        if (!File.Exists(newExePath)) return;
+
+        var result = MessageBox.Show(
+            "クライアントの更新が完了しました。今すぐ再起動して適用しますか？",
+            "更新の適用",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Question);
+
+        if (result != MessageBoxResult.Yes) return;
+
+        var currentExe = Environment.ProcessPath;
+        if (string.IsNullOrEmpty(currentExe)) return;
+
+        var script = Path.Combine(Path.GetTempPath(), "asterism-update.cmd");
+        File.WriteAllText(script, $"""
+            @echo off
+            timeout /t 2 /nobreak > nul
+            copy /y "{newExePath}" "{currentExe}"
+            start "" "{currentExe}"
+            del "%~f0"
+            """);
+
+        Process.Start(new ProcessStartInfo("cmd", $"/c \"{script}\"")
+        {
+            CreateNoWindow = true,
+            UseShellExecute = true
+        });
+
+        Application.Current.Shutdown();
+    }
+
     [RelayCommand(CanExecute = nameof(CanUninstall))]
     private void Uninstall()
     {
@@ -185,18 +227,9 @@ public partial class ToolCardViewModel : ObservableObject
 
         try
         {
-            var outcome = _uninstallService.Uninstall(Tool, _installedRecord);
+            _uninstallService.Uninstall(Tool, _installedRecord);
             _installedRecord = null;
             State = ToolCardState.NotInstalled;
-
-            if (outcome == UninstallOutcome.ManualActionRequired)
-            {
-                MessageBox.Show(
-                    "このツールは既製インストーラーで導入されています。Windowsの「アプリと機能」から削除してください。",
-                    "手動でのアンインストールが必要です",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Information);
-            }
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {

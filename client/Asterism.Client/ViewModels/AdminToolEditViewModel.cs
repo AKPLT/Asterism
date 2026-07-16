@@ -37,13 +37,10 @@ public partial class AdminToolEditViewModel : ObservableObject
     private string tagsText = "";
 
     [ObservableProperty]
-    private PackageType packageType;
-
-    [ObservableProperty]
     private string executablePath = "";
 
     [ObservableProperty]
-    private string? installerArgs;
+    private bool isDisabled;
 
     [ObservableProperty]
     private string? packageFilePath;
@@ -60,10 +57,6 @@ public partial class AdminToolEditViewModel : ObservableObject
     partial void OnPackageFilePathChanged(string? value)
     {
         if (!_isNew || value is null) return;
-
-        var ext = Path.GetExtension(value).ToLowerInvariant();
-        if (ext == ".zip") PackageType = PackageType.Zip;
-        else if (ext is ".exe" or ".msi") PackageType = PackageType.Installer;
 
         if (string.IsNullOrEmpty(Id) || _idAutoFilled)
         {
@@ -93,8 +86,6 @@ public partial class AdminToolEditViewModel : ObservableObject
     [ObservableProperty]
     private string windowTitle = "新規ツール登録";
 
-    public Array PackageTypeValues => Enum.GetValues(typeof(PackageType));
-
     public event EventHandler? SaveCompleted;
 
     public AdminToolEditViewModel(IAdminApiService adminApiService)
@@ -115,9 +106,8 @@ public partial class AdminToolEditViewModel : ObservableObject
             Description = "";
             Category = "";
             TagsText = "";
-            PackageType = PackageType.Zip;
             ExecutablePath = "";
-            InstallerArgs = null;
+            IsDisabled = false;
             WindowTitle = "新規ツール登録";
         }
         else
@@ -128,9 +118,8 @@ public partial class AdminToolEditViewModel : ObservableObject
             Description = existing.Description;
             Category = existing.Category;
             TagsText = string.Join(", ", existing.Tags);
-            PackageType = existing.PackageType;
             ExecutablePath = existing.ExecutablePath;
-            InstallerArgs = existing.InstallerArgs;
+            IsDisabled = existing.IsDisabled;
             WindowTitle = $"ツール編集: {existing.Id}";
         }
 
@@ -177,22 +166,18 @@ public partial class AdminToolEditViewModel : ObservableObject
             Tags = TagsText
                 .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
                 .ToList(),
-            PackageType = PackageType,
+            PackageType = PackageType.Zip,
             ExecutablePath = ExecutablePath,
-            InstallerArgs = string.IsNullOrWhiteSpace(InstallerArgs) ? null : InstallerArgs
+            IsDisabled = IsDisabled
         };
 
         IsSaving = true;
         try
         {
             if (_isNew)
-            {
                 await _adminApiService.CreateToolAsync(entry, PackageFilePath!, IconFilePath);
-            }
             else
-            {
                 await _adminApiService.UpdateToolAsync(Id, entry, PackageFilePath, IconFilePath);
-            }
 
             SaveCompleted?.Invoke(this, EventArgs.Empty);
         }
