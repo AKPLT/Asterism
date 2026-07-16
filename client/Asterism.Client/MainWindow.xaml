@@ -54,10 +54,10 @@
                 Visibility="{Binding BannerMessage, Converter={StaticResource NullToVisibilityConverter}, FallbackValue=Collapsed}">
             <Border.Style>
                 <Style TargetType="Border">
-                    <Setter Property="Background" Value="#2A2000" />
+                    <Setter Property="Background" Value="#FFF3CD" />
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding IsBannerError}" Value="True">
-                            <Setter Property="Background" Value="#2D0B0B" />
+                            <Setter Property="Background" Value="#F8D7DA" />
                         </DataTrigger>
                     </Style.Triggers>
                 </Style>
