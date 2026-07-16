@@ -6,8 +6,8 @@
              xmlns:vm="clr-namespace:Asterism.Client.ViewModels"
              mc:Ignorable="d"
              d:DataContext="{d:DesignInstance Type=vm:ToolCardViewModel}"
-             Width="260" Height="280" Margin="6">
-    <Border BorderThickness="1" CornerRadius="6" Background="White">
+             Width="380" Margin="6">
+    <Border BorderThickness="1" CornerRadius="6" Background="White" Padding="10">
         <Border.Style>
             <Style TargetType="Border">
                 <Setter Property="BorderBrush" Value="#DDDDDD" />
@@ -19,33 +19,31 @@
             </Style>
         </Border.Style>
 
-        <DockPanel Margin="12" LastChildFill="True">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
 
-            <!-- 下部: プログレス・エラー・ボタン (常に最下部) -->
-            <StackPanel DockPanel.Dock="Bottom">
-                <ProgressBar Height="6" Margin="0,4,0,0" Minimum="0" Maximum="1"
-                             Value="{Binding ProgressPercent, Mode=OneWay}"
-                             Visibility="{Binding IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                <TextBlock Text="{Binding ErrorMessage}" Foreground="Red" TextWrapping="Wrap" Margin="0,4,0,0"
-                           Visibility="{Binding ErrorMessage, Converter={StaticResource NullToVisibilityConverter}}" />
-                <Grid Margin="0,8,0,0">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <Button Grid.Column="0" Content="{Binding PrimaryButtonLabel}"
-                            Command="{Binding PrimaryActionCommand}" Padding="0,6" />
-                    <Button Grid.Column="1" Content="アンインストール" Margin="6,0,0,0" Padding="8,6"
-                            Command="{Binding UninstallCommand}" />
-                </Grid>
-            </StackPanel>
+            <!-- アイコン -->
+            <Grid Grid.Column="0" Width="40" Height="40" Margin="0,0,10,0" VerticalAlignment="Top">
+                <Border CornerRadius="8"
+                        Background="{Binding InitialColor, Converter={StaticResource StringToBrushConverter}}"
+                        Visibility="{Binding NoIcon, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <TextBlock Text="{Binding InitialLetter}" FontSize="18" FontWeight="Bold"
+                               Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <Image Source="{Binding IconUrl, Converter={StaticResource StringToImageSourceConverter}}"
+                       Visibility="{Binding HasIcon, Converter={StaticResource BooleanToVisibilityConverter}}" />
+            </Grid>
 
-            <!-- 上部: アイコン・名前・バージョン・バッジ -->
-            <StackPanel DockPanel.Dock="Top">
+            <!-- コンテンツ -->
+            <StackPanel Grid.Column="1">
+
+                <!-- 名前行: バッジ・★ -->
                 <DockPanel>
                     <Button DockPanel.Dock="Right" Command="{Binding ToggleFavoriteCommand}"
-                            Padding="4,0,0,0" Cursor="Hand"
-                            VerticalAlignment="Top" FontSize="16">
+                            Padding="4,0,0,0" Cursor="Hand" FontSize="15" VerticalAlignment="Center">
                         <Button.Template>
                             <ControlTemplate TargetType="Button">
                                 <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
@@ -64,47 +62,34 @@
                             </Style>
                         </Button.Style>
                     </Button>
-                <StackPanel Orientation="Horizontal">
-                    <Grid Width="40" Height="40" Margin="0,0,8,0">
-                        <!-- アイコンなし → イニシャル -->
-                        <Border CornerRadius="8"
-                                Background="{Binding InitialColor, Converter={StaticResource StringToBrushConverter}}"
-                                Visibility="{Binding NoIcon, Converter={StaticResource BooleanToVisibilityConverter}}">
-                            <TextBlock Text="{Binding InitialLetter}" FontSize="18" FontWeight="Bold"
-                                       Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                        </Border>
-                        <!-- アイコンあり → 画像 -->
-                        <Image Source="{Binding IconUrl, Converter={StaticResource StringToImageSourceConverter}}"
-                               Visibility="{Binding HasIcon, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                    </Grid>
-                    <StackPanel VerticalAlignment="Center">
-                        <DockPanel>
-                            <Border DockPanel.Dock="Right" Background="#F59E0B" CornerRadius="4" Padding="5,1" Margin="6,0,0,0"
-                                    Visibility="{Binding IsUpdateAvailable, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                <TextBlock Text="更新あり" FontSize="10" FontWeight="Bold" Foreground="White" />
-                            </Border>
-                            <Border DockPanel.Dock="Right" Background="#059669" CornerRadius="4" Padding="5,1" Margin="6,0,0,0"
-                                    Visibility="{Binding IsLatest, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                <TextBlock Text="最新" FontSize="10" FontWeight="Bold" Foreground="White" />
-                            </Border>
-                            <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="14" TextWrapping="Wrap" />
-                        </DockPanel>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="{Binding Category}" FontSize="11" Foreground="Gray" />
-                            <TextBlock Text=" · " FontSize="11" Foreground="Gray" />
-                            <TextBlock Text="{Binding VersionText, StringFormat='v{0}'}" FontSize="11" Foreground="Gray" />
-                        </StackPanel>
-                    </StackPanel>
-                </StackPanel>
+                    <Border DockPanel.Dock="Right" Background="#F59E0B" CornerRadius="4" Padding="5,1" Margin="4,0,4,0"
+                            VerticalAlignment="Center"
+                            Visibility="{Binding IsUpdateAvailable, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <TextBlock Text="更新あり" FontSize="10" FontWeight="Bold" Foreground="White" />
+                    </Border>
+                    <Border DockPanel.Dock="Right" Background="#059669" CornerRadius="4" Padding="5,1" Margin="4,0,4,0"
+                            VerticalAlignment="Center"
+                            Visibility="{Binding IsLatest, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <TextBlock Text="最新" FontSize="10" FontWeight="Bold" Foreground="White" />
+                    </Border>
+                    <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="13"
+                               VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
                 </DockPanel>
-            </StackPanel>
 
-            <!-- 中央: 説明・タグ (残りスペースを埋める) -->
-            <StackPanel>
-                <TextBlock Text="{Binding Description}" TextWrapping="Wrap" Margin="0,8,0,0"
-                           MaxHeight="54" TextTrimming="CharacterEllipsis" />
+                <!-- カテゴリ・バージョン -->
+                <StackPanel Orientation="Horizontal" Margin="0,1,0,0">
+                    <TextBlock Text="{Binding Category}" FontSize="11" Foreground="Gray" />
+                    <TextBlock Text=" · " FontSize="11" Foreground="Gray" />
+                    <TextBlock Text="{Binding VersionText, StringFormat='v{0}'}" FontSize="11" Foreground="Gray" />
+                </StackPanel>
 
-                <ItemsControl ItemsSource="{Binding Tags}" Margin="0,6,0,0">
+                <!-- 説明 (1行) -->
+                <TextBlock Text="{Binding Description}" FontSize="11" Foreground="#555555"
+                           TextTrimming="CharacterEllipsis" Margin="0,3,0,0"
+                           MaxHeight="18" />
+
+                <!-- タグ -->
+                <ItemsControl ItemsSource="{Binding Tags}" Margin="0,4,0,0">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
                             <WrapPanel />
@@ -115,9 +100,9 @@
                             <Button Command="{Binding DataContext.SelectTagCommand,
                                         RelativeSource={RelativeSource AncestorType=UserControl}}"
                                     CommandParameter="{Binding}"
-                                    Cursor="Hand" Margin="0,0,4,4"
+                                    Cursor="Hand" Margin="0,0,4,2"
                                     Background="Transparent" BorderThickness="0" Padding="0">
-                                <Border Background="#EEEEEE" CornerRadius="8" Padding="6,2">
+                                <Border Background="#EEEEEE" CornerRadius="8" Padding="6,1">
                                     <Border.Style>
                                         <Style TargetType="Border">
                                             <Style.Triggers>
@@ -134,8 +119,27 @@
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
-            </StackPanel>
 
-        </DockPanel>
+                <!-- プログレス・エラー -->
+                <ProgressBar Height="4" Margin="0,4,0,0" Minimum="0" Maximum="1"
+                             Value="{Binding ProgressPercent, Mode=OneWay}"
+                             Visibility="{Binding IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                <TextBlock Text="{Binding ErrorMessage}" Foreground="Red" FontSize="11" TextWrapping="Wrap" Margin="0,2,0,0"
+                           Visibility="{Binding ErrorMessage, Converter={StaticResource NullToVisibilityConverter}}" />
+
+                <!-- ボタン -->
+                <Grid Margin="0,6,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <Button Grid.Column="0" Content="{Binding PrimaryButtonLabel}"
+                            Command="{Binding PrimaryActionCommand}" Padding="0,4" FontSize="12" />
+                    <Button Grid.Column="1" Content="アンインストール" Margin="6,0,0,0" Padding="8,4" FontSize="12"
+                            Command="{Binding UninstallCommand}" />
+                </Grid>
+
+            </StackPanel>
+        </Grid>
     </Border>
 </UserControl>
