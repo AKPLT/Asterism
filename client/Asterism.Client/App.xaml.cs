@@ -32,6 +32,7 @@ public partial class App : Application
                     client.Timeout = TimeSpan.FromSeconds(15);
                 });
 
+                services.AddSingleton<IUserSettingsService, UserSettingsService>();
                 services.AddSingleton<IManifestService, ManifestService>();
                 services.AddSingleton<ILocalStateService, LocalStateService>();
                 services.AddSingleton<IInstallService, InstallService>();

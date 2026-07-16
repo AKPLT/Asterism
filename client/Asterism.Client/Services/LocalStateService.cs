@@ -6,6 +6,7 @@ namespace Asterism.Client.Services;
 
 public sealed class LocalStateService : ILocalStateService
 {
+    private readonly IUserSettingsService _userSettingsService;
     private readonly string _rootDirectory;
     private readonly string _stateFilePath;
     private readonly object _lock = new();
@@ -16,14 +17,17 @@ public sealed class LocalStateService : ILocalStateService
         Converters = { new System.Text.Json.Serialization.JsonStringEnumConverter() }
     };
 
-    public string ToolsRootDirectory { get; }
+    public string ToolsRootDirectory =>
+        _userSettingsService.ToolsDirectory is { Length: > 0 } dir
+            ? dir
+            : Path.Combine(_rootDirectory, "Tools");
 
-    public LocalStateService()
+    public LocalStateService(IUserSettingsService userSettingsService)
     {
+        _userSettingsService = userSettingsService;
         _rootDirectory = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "Asterism");
-        ToolsRootDirectory = Path.Combine(_rootDirectory, "Tools");
         _stateFilePath = Path.Combine(_rootDirectory, "installed.json");
 
         Directory.CreateDirectory(_rootDirectory);

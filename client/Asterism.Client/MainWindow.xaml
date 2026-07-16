@@ -11,6 +11,7 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
         <!-- ヘッダー: タイトル + 検索 + 更新確認 -->
@@ -76,5 +77,15 @@
                 </ItemsControl>
             </ScrollViewer>
         </Grid>
+        <!-- フッター: インストール先 -->
+        <DockPanel Grid.Row="3" Margin="0,6,0,0" LastChildFill="True">
+            <Button DockPanel.Dock="Right" Content="変更" Padding="8,2"
+                    Command="{Binding ChangeInstallFolderCommand}" />
+            <Button DockPanel.Dock="Right" Content="フォルダを開く" Padding="8,2" Margin="0,0,4,0"
+                    Command="{Binding OpenInstallFolderCommand}" />
+            <TextBlock DockPanel.Dock="Left" Text="インストール先: " VerticalAlignment="Center" FontSize="11" Foreground="Gray" />
+            <TextBlock Text="{Binding InstallDirectory}" VerticalAlignment="Center"
+                       FontSize="11" Foreground="Gray" TextTrimming="CharacterEllipsis" />
+        </DockPanel>
     </Grid>
 </Window>

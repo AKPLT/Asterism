@@ -1,5 +1,7 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
+using System.IO;
 using System.Windows.Data;
 using System.Windows.Threading;
 using Asterism.Client.Options;
@@ -9,6 +11,7 @@ using Asterism.Shared.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Options;
+using Microsoft.Win32;
 
 namespace Asterism.Client.ViewModels;
 
@@ -18,6 +21,7 @@ public partial class MainViewModel : ObservableObject
 
     private readonly IManifestService _manifestService;
     private readonly ILocalStateService _localStateService;
+    private readonly IUserSettingsService _userSettingsService;
     private readonly IInstallService _installService;
     private readonly ILaunchService _launchService;
     private readonly IUninstallService _uninstallService;
@@ -44,11 +48,15 @@ public partial class MainViewModel : ObservableObject
     private string? bannerMessage;
 
     [ObservableProperty]
+    private string installDirectory = "";
+
+    [ObservableProperty]
     private bool isBannerError;
 
     public MainViewModel(
         IManifestService manifestService,
         ILocalStateService localStateService,
+        IUserSettingsService userSettingsService,
         IInstallService installService,
         ILaunchService launchService,
         IUninstallService uninstallService,
@@ -56,9 +64,11 @@ public partial class MainViewModel : ObservableObject
     {
         _manifestService = manifestService;
         _localStateService = localStateService;
+        _userSettingsService = userSettingsService;
         _installService = installService;
         _launchService = launchService;
         _uninstallService = uninstallService;
+        InstallDirectory = _localStateService.ToolsRootDirectory;
 
         ToolsView = CollectionViewSource.GetDefaultView(AllTools);
         ToolsView.Filter = FilterPredicate;
@@ -201,6 +211,30 @@ public partial class MainViewModel : ObservableObject
 
     [RelayCommand]
     private void ClearSearch() => SearchText = "";
+
+    [RelayCommand]
+    private void OpenInstallFolder()
+    {
+        var dir = _localStateService.ToolsRootDirectory;
+        Directory.CreateDirectory(dir);
+        Process.Start(new ProcessStartInfo("explorer.exe", dir) { UseShellExecute = true });
+    }
+
+    [RelayCommand]
+    private void ChangeInstallFolder()
+    {
+        var dialog = new OpenFolderDialog
+        {
+            Title = "インストール先フォルダの選択",
+            InitialDirectory = _localStateService.ToolsRootDirectory
+        };
+
+        if (dialog.ShowDialog() != true) return;
+
+        _userSettingsService.ToolsDirectory = dialog.FolderName;
+        _userSettingsService.Save();
+        InstallDirectory = _localStateService.ToolsRootDirectory;
+    }
 
     partial void OnSearchTextChanged(string value)
     {
