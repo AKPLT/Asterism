@@ -29,11 +29,28 @@ public static class AdminToolsEndpoints
         group.MapPost("/tools", CreateToolAsync);
         group.MapPut("/tools/{id}", UpdateToolAsync);
 
-        group.MapDelete("/tools/{id}", async (string id, ManifestStore store, CancellationToken ct) =>
+        group.MapDelete("/tools/{id}", async (string id, bool purge, ManifestStore store, IWebHostEnvironment env, CancellationToken ct) =>
         {
             try
             {
+                string? downloadUrl = null;
+                string? iconUrl = null;
+                if (purge)
+                {
+                    var manifest = await store.ReadAsync(ct);
+                    var target = manifest.Tools.FirstOrDefault(t => t.Id == id);
+                    downloadUrl = target?.DownloadUrl;
+                    iconUrl = target?.IconUrl;
+                }
+
                 await store.RemoveToolAsync(id, ct);
+
+                if (purge)
+                {
+                    DeleteFileIfExists(env.WebRootPath, downloadUrl);
+                    DeleteFileIfExists(env.WebRootPath, iconUrl);
+                }
+
                 return Results.NoContent();
             }
             catch (KeyNotFoundException ex)
@@ -169,4 +186,12 @@ public static class AdminToolsEndpoints
 
     private static bool IsSafeSegment(string value) =>
         !string.IsNullOrWhiteSpace(value) && Regex.IsMatch(value, "^[a-zA-Z0-9._-]+$");
+
+    private static void DeleteFileIfExists(string webRoot, string? relativePath)
+    {
+        if (string.IsNullOrWhiteSpace(relativePath)) return;
+        var fullPath = Path.GetFullPath(Path.Combine(webRoot, relativePath.Replace('/', Path.DirectorySeparatorChar)));
+        if (fullPath.StartsWith(webRoot, StringComparison.OrdinalIgnoreCase) && File.Exists(fullPath))
+            File.Delete(fullPath);
+    }
 }

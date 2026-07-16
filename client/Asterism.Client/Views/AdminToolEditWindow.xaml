@@ -6,10 +6,14 @@
     <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="16">
         <StackPanel>
             <TextBlock Text="パッケージファイル（.zip）（新規登録時は必須。編集時は未選択なら既存ファイルを維持）" FontWeight="Bold" TextWrapping="Wrap" />
-            <DockPanel Margin="0,2,0,10">
-                <Button Content="選択..." DockPanel.Dock="Right" Padding="8,4" Click="OnSelectPackageClick" />
-                <TextBlock Text="{Binding PackageFilePath}" VerticalAlignment="Center" Margin="0,0,8,0" TextTrimming="CharacterEllipsis" />
-            </DockPanel>
+            <Grid Margin="0,2,0,10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Button Grid.Column="0" Content="選択..." Padding="8,4" Click="OnSelectPackageClick" />
+                <TextBlock Grid.Column="1" Text="{Binding PackageFilePath}" VerticalAlignment="Center" Margin="8,0,0,0" TextTrimming="CharacterEllipsis" />
+            </Grid>
 
             <TextBlock Text="ID" FontWeight="Bold" />
             <TextBox Text="{Binding Id, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="{Binding IsIdReadOnly}" Margin="0,2,0,10" Padding="4" />
@@ -37,10 +41,14 @@
                       IsChecked="{Binding IsDisabled}" Margin="0,0,0,10" />
 
             <TextBlock Text="アイコンファイル（任意。未選択なら既存アイコンを維持）" FontWeight="Bold" TextWrapping="Wrap" />
-            <DockPanel Margin="0,2,0,10">
-                <Button Content="選択..." DockPanel.Dock="Right" Padding="8,4" Click="OnSelectIconClick" />
-                <TextBlock Text="{Binding IconFilePath}" VerticalAlignment="Center" Margin="0,0,8,0" TextTrimming="CharacterEllipsis" />
-            </DockPanel>
+            <Grid Margin="0,2,0,10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Button Grid.Column="0" Content="選択..." Padding="8,4" Click="OnSelectIconClick" />
+                <TextBlock Grid.Column="1" Text="{Binding IconFilePath}" VerticalAlignment="Center" Margin="8,0,0,0" TextTrimming="CharacterEllipsis" />
+            </Grid>
 
             <TextBlock Text="{Binding ErrorMessage}" Foreground="Red" TextWrapping="Wrap" Margin="0,4,0,10"
                        Visibility="{Binding ErrorMessage, Converter={StaticResource NullToVisibilityConverter}}" />

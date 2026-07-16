@@ -74,17 +74,19 @@ public partial class AdminViewModel : ObservableObject
     [RelayCommand]
     private async Task DeleteAsync(ToolEntry tool)
     {
-        var result = MessageBox.Show(
-            $"'{tool.Name}' を削除しますか？\n（サーバー上の関連ファイルは残ります）",
+        var confirm = MessageBox.Show(
+            $"'{tool.Name}' をツール一覧から削除しますか？",
             "削除の確認", MessageBoxButton.YesNo, MessageBoxImage.Warning);
-        if (result != MessageBoxResult.Yes)
-        {
-            return;
-        }
+        if (confirm != MessageBoxResult.Yes) return;
+
+        var purgeResult = MessageBox.Show(
+            "サーバー上のZIPファイルとアイコン画像も一緒に削除しますか？\n\n「はい」→ ファイルも削除\n「いいえ」→ 一覧からのみ削除（ファイルは残す）",
+            "関連ファイルの削除", MessageBoxButton.YesNo, MessageBoxImage.Question);
+        var purge = purgeResult == MessageBoxResult.Yes;
 
         try
         {
-            await _adminApiService.DeleteToolAsync(tool.Id);
+            await _adminApiService.DeleteToolAsync(tool.Id, purge);
             await LoadAsync();
         }
         catch (AdminApiException ex)

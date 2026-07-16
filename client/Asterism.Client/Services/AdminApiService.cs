@@ -75,9 +75,10 @@ public sealed class AdminApiService : IAdminApiService
         return (await response.Content.ReadFromJsonAsync<ToolEntry>(JsonOptions, ct))!;
     }
 
-    public async Task DeleteToolAsync(string id, CancellationToken ct = default)
+    public async Task DeleteToolAsync(string id, bool purge = false, CancellationToken ct = default)
     {
-        using var response = await SendAsync(HttpMethod.Delete, $"api/admin/tools/{id}", null, ct);
+        var uri = purge ? $"api/admin/tools/{id}?purge=true" : $"api/admin/tools/{id}";
+        using var response = await SendAsync(HttpMethod.Delete, uri, null, ct);
     }
 
     private static MultipartFormDataContent BuildFormContent(ToolEntry metadata, string? packageFilePath, string? iconFilePath)
