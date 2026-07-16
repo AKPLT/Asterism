@@ -42,6 +42,23 @@
 
             <!-- 上部: アイコン・名前・バージョン・バッジ -->
             <StackPanel DockPanel.Dock="Top">
+                <DockPanel>
+                    <Button DockPanel.Dock="Right" Command="{Binding ToggleFavoriteCommand}"
+                            Background="Transparent" BorderThickness="0" Padding="4,0,0,0" Cursor="Hand"
+                            VerticalAlignment="Top" FontSize="16">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Content" Value="☆" />
+                                <Setter Property="Foreground" Value="#AAAAAA" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsFavorite}" Value="True">
+                                        <Setter Property="Content" Value="★" />
+                                        <Setter Property="Foreground" Value="#F59E0B" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
                 <StackPanel Orientation="Horizontal">
                     <Grid Width="40" Height="40" Margin="0,0,8,0">
                         <!-- アイコンなし → イニシャル -->
@@ -70,6 +87,7 @@
                         </StackPanel>
                     </StackPanel>
                 </StackPanel>
+                </DockPanel>
             </StackPanel>
 
             <!-- 中央: 説明・タグ (残りスペースを埋める) -->

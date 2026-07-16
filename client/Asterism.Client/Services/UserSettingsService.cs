@@ -38,6 +38,16 @@ public sealed class UserSettingsService : IUserSettingsService
         }
     }
 
+    public bool IsFavorite(string toolId) => _settings.FavoriteIds.Contains(toolId);
+
+    public void ToggleFavorite(string toolId)
+    {
+        if (_settings.FavoriteIds.Contains(toolId))
+            _settings.FavoriteIds.Remove(toolId);
+        else
+            _settings.FavoriteIds.Add(toolId);
+    }
+
     public void Save()
     {
         var json = JsonSerializer.Serialize(_settings, JsonOptions);

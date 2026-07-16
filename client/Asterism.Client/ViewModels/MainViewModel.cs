@@ -151,8 +151,9 @@ public partial class MainViewModel : ObservableObject
             var card = AllTools.FirstOrDefault(c => c.Tool.Id == tool.Id);
             if (card == null)
             {
-                card = new ToolCardViewModel(tool, _installService, _launchService, _uninstallService, _localStateService);
+                card = new ToolCardViewModel(tool, _installService, _launchService, _uninstallService, _localStateService, _userSettingsService);
                 card.OnTagClicked = tag => SearchText = tag;
+                card.OnFavoriteToggled = () => ToolsView.Refresh();
                 card.PropertyChanged += OnToolCardPropertyChanged;
                 AllTools.Add(card);
             }
@@ -201,10 +202,11 @@ public partial class MainViewModel : ObservableObject
         var current = SelectedCategory;
 
         Categories.Clear();
-        foreach (var category in ToolFilter.BuildCategoryList(AllTools.Select(c => c.Category)))
-        {
-            Categories.Add(category);
-        }
+        var builtList = ToolFilter.BuildCategoryList(AllTools.Select(c => c.Category));
+        Categories.Add(builtList[0]); // "すべて"
+        Categories.Add(ToolFilter.FavoritesLabel);
+        for (var i = 1; i < builtList.Count; i++)
+            Categories.Add(builtList[i]);
 
         SelectedCategory = Categories.Contains(current) ? current : AllCategoriesLabel;
     }
@@ -248,6 +250,9 @@ public partial class MainViewModel : ObservableObject
 
     private bool FilterPredicate(object obj)
     {
-        return obj is ToolCardViewModel card && ToolFilter.Matches(card.Tool, SearchText, SelectedCategory);
+        if (obj is not ToolCardViewModel card) return false;
+        if (SelectedCategory == ToolFilter.FavoritesLabel)
+            return card.IsFavorite && ToolFilter.Matches(card.Tool, SearchText, AllCategoriesLabel);
+        return ToolFilter.Matches(card.Tool, SearchText, SelectedCategory);
     }
 }

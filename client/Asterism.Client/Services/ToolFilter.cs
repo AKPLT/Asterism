@@ -6,6 +6,7 @@ namespace Asterism.Client.Services;
 public static class ToolFilter
 {
     public const string AllCategoriesLabel = "すべて";
+    public const string FavoritesLabel = "★ お気に入り";
 
     public static bool Matches(ToolEntry tool, string? searchText, string selectedCategory)
     {

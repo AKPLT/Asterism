@@ -22,11 +22,15 @@ public partial class ToolCardViewModel : ObservableObject
     private readonly ILaunchService _launchService;
     private readonly IUninstallService _uninstallService;
     private readonly ILocalStateService _localStateService;
+    private readonly IUserSettingsService _userSettingsService;
 
     private InstalledToolRecord? _installedRecord;
 
     public ToolEntry Tool { get; private set; }
     public Action<string>? OnTagClicked { get; set; }
+    public Action? OnFavoriteToggled { get; set; }
+
+    public bool IsFavorite => _userSettingsService.IsFavorite(Tool.Id);
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(PrimaryButtonLabel))]
@@ -73,13 +77,15 @@ public partial class ToolCardViewModel : ObservableObject
         IInstallService installService,
         ILaunchService launchService,
         IUninstallService uninstallService,
-        ILocalStateService localStateService)
+        ILocalStateService localStateService,
+        IUserSettingsService userSettingsService)
     {
         Tool = tool;
         _installService = installService;
         _launchService = launchService;
         _uninstallService = uninstallService;
         _localStateService = localStateService;
+        _userSettingsService = userSettingsService;
 
         RefreshState();
     }
@@ -202,4 +208,13 @@ public partial class ToolCardViewModel : ObservableObject
 
     [RelayCommand]
     private void SelectTag(string tag) => OnTagClicked?.Invoke(tag);
+
+    [RelayCommand]
+    private void ToggleFavorite()
+    {
+        _userSettingsService.ToggleFavorite(Tool.Id);
+        _userSettingsService.Save();
+        OnPropertyChanged(nameof(IsFavorite));
+        OnFavoriteToggled?.Invoke();
+    }
 }
