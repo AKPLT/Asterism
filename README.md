@@ -2,7 +2,7 @@
 
 社内の各部署に散在するツールのダウンロード・アップデート・起動を一元管理する社内ツールポータル。
 
-- **サーバー**: 静的ファイル配信（manifest.json + ZIP/インストーラー配布）に加え、認証付きの管理API（ツール登録・編集・削除）を持つASP.NET Core
+- **サーバー**: 静的ファイル配信（manifest.json + ZIP配布）に加え、認証付きの管理API（ツール登録・編集・削除）を持つASP.NET Core
 - **クライアント**: C# WPF (.NET 8) デスクトップアプリ。一般利用者向けの一覧・インストール画面に加え、パスワードでロック解除する「管理者モード」でツール登録・編集ができる
 - **共有**: `ToolEntry`等のモデルはサーバー・クライアントで共有クラスライブラリ（`Asterism.Shared`）として共通化
 
@@ -15,7 +15,7 @@ Asterism/
 ├── server/
 │   ├── Asterism.Server/        ASP.NET Core（静的ファイル配信 + 管理API）
 │   │   └── wwwroot/            manifest.json / icons / tools (配布物置き場)
-│   └── SampleTools/            デモ用ダミーツールのソース（DB Converter, Sample Installer）
+│   └── SampleTools/            デモ用ダミーツールのソース（DB Converter）
 └── client/
     └── Asterism.Client/        WPFクライアント本体（一般画面 + 管理者モード）
 ```
@@ -49,11 +49,10 @@ dotnet run
 
 ## 使い方（デモ）
 
-同梱の `wwwroot/manifest.json` には7カテゴリ・20種類のデモツールが登録されています。
+同梱の `wwwroot/manifest.json` には7カテゴリ・19種類のデモツールが登録されています。
 
-- **DB Converter**（Zip型） - インストールするとZIPがダウンロード・展開され、起動できるようになります。
-- **Sample Installer App**（Installer型） - 既製ツール（Visual Studioなど）のようなインストーラー配布を模したデモです。インストールするとサイレント引数付きで実行され、`%LOCALAPPDATA%\Asterism\DemoInstalled\` 配下に自身をコピーします。
-- その他18種のダミーツール（ファイルなし）— カード一覧・検索・カテゴリ絞り込みの動作確認用です。
+- **DB Converter** - インストールするとZIPがダウンロード・展開され、起動できるようになります。
+- その他18種のダミーツール（実体は同じZIPを使い回し）— カード一覧・検索・カテゴリ絞り込みの動作確認用です。
 
 一覧画面では検索・カテゴリ絞り込み・お気に入り登録・インストール/更新/起動/アンインストール・バックグラウンドでの更新確認（既定10分間隔、ヘッダーの「更新を確認」で即時実行も可）が行えます。
 
@@ -66,15 +65,15 @@ dotnet run
 
 ツールの登録・編集は、クライアントの「管理者モード」から行います（別クライアントや管理用Webページは用意していません）。
 
-1. サーバーの `appsettings.json`（本番）または `appsettings.Development.json`（開発、既定値 `dev-secret-key`）で管理者パスワードを設定します。
+1. サーバーの `appsettings.json`（本番）または `appsettings.Development.json`（開発、既定値 `admin`）で管理者パスワードを設定します。
    ```json
    { "Asterism": { "AdminApiKey": "任意の管理者パスワード" } }
    ```
 2. クライアントのメニューバー「ツール → 管理者モード」をクリックし、上記のパスワードを入力してロックを解除します。
-3. 管理者画面で「新規登録」「編集」「削除」が行えます。新規登録時はパッケージファイル（`packageType`が`Zip`なら`.zip`、`Installer`なら`.exe`/`.msi`）が必須です。アイコンは手動選択ではなく、パッケージ内の`executablePath`が指すexeから自動抽出されます（抽出できない場合はプレースホルダー表示）。
+3. 管理者画面で「新規登録」「編集」「削除」が行えます。新規登録時はパッケージファイル（`.zip`）が必須です。アイコンは手動選択ではなく、パッケージ内の`executablePath`が指すexeから自動抽出されます（抽出できない場合はプレースホルダー表示）。
 4. 保存すると、サーバー側でパッケージ/アイコンが `wwwroot/tools/` `wwwroot/icons/` に配置され、`manifest.json` に反映されます。一般利用者の画面では「更新を確認」を押すと新しいツールがすぐに一覧へ反映されます。バージョンを変更する場合は新しいパッケージファイルの選択が必須です（ファイルなしでのバージョン変更はエラーになります）。
 
-**注意**: 削除ダイアログで「いいえ」を選ぶと `manifest.json` からエントリを取り除くのみで、サーバー上のパッケージ/アイコンファイルは残ります（誤操作時の復旧をしやすくするための挙動）。「はい」を選ぶとファイルも同時に削除します（二段階確認あり）。また、`packageType: "Installer"` のツールはOS側の「アプリと機能」からの手動アンインストールが必要なため、管理者モードでの削除もクライアント側の導入記録を消すだけです。
+**注意**: 削除ダイアログで「いいえ」を選ぶと `manifest.json` からエントリを取り除くのみで、サーバー上のパッケージ/アイコンファイルは残ります（誤操作時の復旧をしやすくするための挙動）。「はい」を選ぶと同じIDの全バージョンのパッケージ/アイコンファイルも同時に削除します（二段階確認あり）。
 
 ### クライアントのローカル状態
 
@@ -106,19 +105,16 @@ dotnet run
 }
 ```
 
-| フィールド                | 型                       | 説明                                                                                              |
-| ------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------- |
-| `id`                      | string                   | 一意識別子。インストール先フォルダ名にも使用                                                      |
-| `name` / `description`    | string                   | 表示名・説明文                                                                                    |
-| `version`                 | string                   | `System.Version` でパース可能な形式（例: `1.0.0`）                                                |
-| `category`                | string                   | サイドバーのカテゴリ絞り込みに使う主カテゴリ                                                      |
-| `tags`                    | string[]                 | 検索対象の補助タグ（省略時は空配列）                                                              |
-| `iconUrl` / `downloadUrl` | string                   | 絶対URL・相対パスどちらも可（相対時はサーバーのBaseAddressを基準に解決）                          |
-| `packageType`             | `"Zip"` \| `"Installer"` | 配布形式。`Zip`は展開、`Installer`はサイレント実行                                                |
-| `executablePath`          | string                   | `Zip`型: 展開後フォルダからの相対パス / `Installer`型: インストール後の絶対パス（環境変数展開可） |
-| `installerArgs`           | string（任意）           | `Installer`型のみ。サイレントインストール引数                                                     |
-
-`packageType: "Installer"` を使うと、社内製ツール以外の既製ツール（Visual Studioなど）のインストーラー配布にも対応できます。ただしアンインストールはOS側の「アプリと機能」からの手動操作が必要です（Asterism側では導入記録の削除のみ行います）。
+| フィールド                | 型       | 説明                                                                     |
+| ------------------------- | -------- | ------------------------------------------------------------------------ |
+| `id`                      | string   | 一意識別子。インストール先フォルダ名にも使用                             |
+| `name` / `description`    | string   | 表示名・説明文                                                          |
+| `version`                 | string   | 任意の文字列。前回インストール時と完全一致しない場合に更新ありと判定される |
+| `category`                | string   | サイドバーのカテゴリ絞り込みに使う主カテゴリ                             |
+| `tags`                    | string[] | 検索対象の補助タグ（省略時は空配列）                                     |
+| `iconUrl` / `downloadUrl` | string   | 絶対URL・相対パスどちらも可（相対時はサーバーのBaseAddressを基準に解決） |
+| `packageType`             | `"Zip"`  | 配布形式。zipを展開してインストールする                                 |
+| `executablePath`          | string   | 展開後フォルダからの相対パス（zip直下がフォルダ1つだけの場合は剥がされた後の相対パス） |
 
 ## 本番運用
 
@@ -139,10 +135,10 @@ dotnet run
 
 ```powershell
 cd server\Asterism.Server
-dotnet publish -c Release -r win-x64 --self-contained -o publish\
+dotnet publish -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o publish\
 ```
 
-`publish\` フォルダ内の `Asterism.Server.exe` と `wwwroot/` をサーバーPCに配置します。
+`-p:PublishSingleFile=true` を付けないと `Asterism.Server.exe` が実行に必要な大量のDLLに依存する構成になり、`exe`単体をコピーしても起動できません（`Asterism.Server.dll` が見つからない、というエラーになります）。上記コマンドなら `publish\` フォルダ内の `Asterism.Server.exe` と `wwwroot/`（と `appsettings.json`）だけをサーバーPCに配置すれば動作します。
 
 #### 2. 管理者パスワードを設定する
 
@@ -184,7 +180,7 @@ netsh advfirewall firewall add rule name="Asterism" dir=in action=allow protocol
 
 ```powershell
 cd client\Asterism.Client
-dotnet publish -c Release -r win-x64 --self-contained -o publish\
+dotnet publish -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o publish\
 ```
 
 #### 2. appsettings.json をサーバーに向ける
