@@ -1,6 +1,10 @@
 using System.IO;
 using System.IO.Compression;
 using System.Text.RegularExpressions;
+using System.Windows;
+using System.Windows.Interop;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using Asterism.Client.Services;
 using Asterism.Client.Services.Exceptions;
 using Asterism.Shared.Models;
@@ -47,6 +51,9 @@ public partial class AdminToolEditViewModel : ObservableObject
     [ObservableProperty]
     private string? packageFilePath;
 
+    [ObservableProperty]
+    private ImageSource? iconPreview;
+
     partial void OnIdChanged(string value)
     {
         if (!_settingAutoId)
@@ -55,17 +62,59 @@ public partial class AdminToolEditViewModel : ObservableObject
 
     partial void OnPackageFilePathChanged(string? value)
     {
-        if (!_isNew || value is null) return;
+        IconPreview = null;
+        if (value is null) return;
 
-        if (string.IsNullOrEmpty(Id) || _idAutoFilled)
+        if (_isNew)
         {
-            _settingAutoId = true;
-            Id = GenerateId(value);
-            _settingAutoId = false;
-            _idAutoFilled = true;
+            if (string.IsNullOrEmpty(Id) || _idAutoFilled)
+            {
+                _settingAutoId = true;
+                Id = GenerateId(value);
+                _settingAutoId = false;
+                _idAutoFilled = true;
+            }
+
+            TryAutoFillFromPackage(value);
         }
 
-        TryAutoFillFromPackage(value);
+        TryLoadIconPreview(value);
+    }
+
+    partial void OnExecutablePathChanged(string value)
+    {
+        if (!string.IsNullOrWhiteSpace(PackageFilePath))
+        {
+            TryLoadIconPreview(PackageFilePath);
+        }
+    }
+
+    public IReadOnlyList<string> GetPackageExecutableCandidates()
+    {
+        if (string.IsNullOrWhiteSpace(PackageFilePath)) return Array.Empty<string>();
+
+        try
+        {
+            using var archive = ZipFile.OpenRead(PackageFilePath);
+            var stripPrefix = ComputeZipStripPrefix(archive);
+
+            return archive.Entries
+                .Where(e => Path.GetExtension(e.FullName).Equals(".exe", StringComparison.OrdinalIgnoreCase))
+                .Select(e =>
+                {
+                    var name = e.FullName.Replace('\\', '/');
+                    if (stripPrefix is not null && name.StartsWith(stripPrefix, StringComparison.OrdinalIgnoreCase))
+                        name = name[stripPrefix.Length..];
+                    return name.Replace('/', Path.DirectorySeparatorChar);
+                })
+                .Distinct()
+                .OrderBy(n => n, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+        }
+        catch (InvalidDataException)
+        {
+            return Array.Empty<string>();
+        }
     }
 
     private static string GenerateId(string filePath)
@@ -82,15 +131,7 @@ public partial class AdminToolEditViewModel : ObservableObject
         try
         {
             using var archive = ZipFile.OpenRead(zipPath);
-
-            // インストール時にzip直下のフォルダが1つだけなら剥がされる仕様に合わせて照合する
-            var entryNames = archive.Entries.Select(e => e.FullName.Replace('\\', '/')).ToList();
-            var topLevelSegments = entryNames.Select(n => n.Split('/')[0]).Distinct().ToList();
-            string? stripPrefix = null;
-            if (topLevelSegments.Count == 1 && entryNames.Any(n => n.Contains('/')))
-            {
-                stripPrefix = topLevelSegments[0] + "/";
-            }
+            var stripPrefix = ComputeZipStripPrefix(archive);
 
             var exeEntries = archive.Entries
                 .Where(e => Path.GetExtension(e.FullName).Equals(".exe", StringComparison.OrdinalIgnoreCase))
@@ -112,6 +153,66 @@ public partial class AdminToolEditViewModel : ObservableObject
         {
             // zipとして開けない場合は自動入力をあきらめ、手動入力に任せる
         }
+    }
+
+    private void TryLoadIconPreview(string zipPath)
+    {
+        if (!OperatingSystem.IsWindows()) return;
+
+        var tempPath = Path.Combine(Path.GetTempPath(), $"{Guid.NewGuid():N}.exe");
+        try
+        {
+            using var archive = ZipFile.OpenRead(zipPath);
+            var stripPrefix = ComputeZipStripPrefix(archive);
+
+            var exeEntry = !string.IsNullOrWhiteSpace(ExecutablePath)
+                ? FindEntryByRelativePath(archive, stripPrefix, ExecutablePath)
+                : archive.Entries.Count(e => Path.GetExtension(e.FullName).Equals(".exe", StringComparison.OrdinalIgnoreCase)) == 1
+                    ? archive.Entries.First(e => Path.GetExtension(e.FullName).Equals(".exe", StringComparison.OrdinalIgnoreCase))
+                    : null;
+
+            if (exeEntry is null) return;
+
+            exeEntry.ExtractToFile(tempPath, overwrite: true);
+
+            using var icon = System.Drawing.Icon.ExtractAssociatedIcon(tempPath);
+            if (icon is null) return;
+
+            var bitmapSource = Imaging.CreateBitmapSourceFromHIcon(
+                icon.Handle, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+            bitmapSource.Freeze();
+            IconPreview = bitmapSource;
+        }
+        catch (InvalidDataException)
+        {
+            // zipとして開けない場合はプレビューをあきらめる
+        }
+        finally
+        {
+            if (File.Exists(tempPath)) File.Delete(tempPath);
+        }
+    }
+
+    private static string? ComputeZipStripPrefix(ZipArchive archive)
+    {
+        // インストール時にzip直下のフォルダが1つだけなら剥がされる仕様に合わせて照合する
+        var entryNames = archive.Entries.Select(e => e.FullName.Replace('\\', '/')).ToList();
+        var topLevelSegments = entryNames.Select(n => n.Split('/')[0]).Distinct().ToList();
+        return topLevelSegments.Count == 1 && entryNames.Any(n => n.Contains('/'))
+            ? topLevelSegments[0] + "/"
+            : null;
+    }
+
+    private static ZipArchiveEntry? FindEntryByRelativePath(ZipArchive archive, string? stripPrefix, string relativePath)
+    {
+        var normalizedTarget = relativePath.Replace('\\', '/').TrimStart('/');
+        return archive.Entries.FirstOrDefault(e =>
+        {
+            var name = e.FullName.Replace('\\', '/');
+            if (stripPrefix is not null && name.StartsWith(stripPrefix, StringComparison.OrdinalIgnoreCase))
+                name = name[stripPrefix.Length..];
+            return name.Equals(normalizedTarget, StringComparison.OrdinalIgnoreCase);
+        });
     }
 
     [ObservableProperty]
@@ -164,6 +265,7 @@ public partial class AdminToolEditViewModel : ObservableObject
         }
 
         ErrorMessage = null;
+        IconPreview = null;
         _idAutoFilled = false;
         _settingAutoId = false;
         PackageFilePath = initialPackagePath;

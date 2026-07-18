@@ -15,6 +15,14 @@
                 <TextBlock Grid.Column="1" Text="{Binding PackageFilePath}" VerticalAlignment="Center" Margin="8,0,0,0" TextTrimming="CharacterEllipsis" />
             </Grid>
 
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,10"
+                        Visibility="{Binding IconPreview, Converter={StaticResource NullToVisibilityConverter}}">
+                <Border Width="40" Height="40" BorderThickness="1" BorderBrush="#DDDDDD" CornerRadius="6">
+                    <Image Source="{Binding IconPreview}" Width="32" Height="32" />
+                </Border>
+                <TextBlock Text="アイコンプレビュー" VerticalAlignment="Center" Margin="8,0,0,0" FontSize="11" Foreground="Gray" />
+            </StackPanel>
+
             <TextBlock Text="ID" FontWeight="Bold" />
             <TextBox Text="{Binding Id, UpdateSourceTrigger=PropertyChanged}" IsReadOnly="{Binding IsIdReadOnly}" Margin="0,2,0,10" Padding="4" />
 
@@ -35,7 +43,14 @@
             <TextBox Text="{Binding TagsText, UpdateSourceTrigger=PropertyChanged}" Margin="0,2,0,10" Padding="4" />
 
             <TextBlock Text="実行ファイルパス（展開後フォルダからの相対パス）" FontWeight="Bold" TextWrapping="Wrap" />
-            <TextBox Text="{Binding ExecutablePath, UpdateSourceTrigger=PropertyChanged}" Margin="0,2,0,10" Padding="4" />
+            <Grid Margin="0,2,0,10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBox Grid.Column="0" Text="{Binding ExecutablePath, UpdateSourceTrigger=PropertyChanged}" Padding="4" />
+                <Button Grid.Column="1" Content="選択..." Padding="8,4" Margin="6,0,0,0" Click="OnSelectExecutableClick" />
+            </Grid>
 
             <CheckBox Content="このツールを無効化する（一般ユーザーの一覧に表示しない）"
                       IsChecked="{Binding IsDisabled}" Margin="0,0,0,10" />
