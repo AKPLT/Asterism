@@ -16,6 +16,7 @@ public static class ToolFilter
 
         var text = searchText?.Trim() ?? "";
         var textOk = text.Length == 0
+            || tool.Id.Contains(text, StringComparison.OrdinalIgnoreCase)
             || tool.Name.Contains(text, StringComparison.OrdinalIgnoreCase)
             || tool.Description.Contains(text, StringComparison.OrdinalIgnoreCase)
             || tool.Tags.Any(t => t.Contains(text, StringComparison.OrdinalIgnoreCase));
