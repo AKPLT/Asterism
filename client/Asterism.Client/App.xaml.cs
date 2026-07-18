@@ -29,7 +29,7 @@ public partial class App : Application
                 {
                     var options = sp.GetRequiredService<IOptions<AsterismOptions>>().Value;
                     client.BaseAddress = new Uri(options.ServerBaseUrl);
-                    client.Timeout = TimeSpan.FromSeconds(15);
+                    client.Timeout = TimeSpan.FromMinutes(30);
                 });
 
                 services.AddSingleton<IUserSettingsService, UserSettingsService>();
