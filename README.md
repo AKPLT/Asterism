@@ -138,7 +138,9 @@ cd server\Asterism.Server
 dotnet publish -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o publish\
 ```
 
-`-p:PublishSingleFile=true` を付けないと `Asterism.Server.exe` が実行に必要な大量のDLLに依存する構成になり、`exe`単体をコピーしても起動できません（`Asterism.Server.dll` が見つからない、というエラーになります）。上記コマンドなら `publish\` フォルダ内の `Asterism.Server.exe` と `wwwroot/`（と `appsettings.json`）だけをサーバーPCに配置すれば動作します。
+`-p:PublishSingleFile=true` を付けないと `Asterism.Server.exe` が実行に必要な大量のDLLに依存する構成になり、`exe`単体をコピーしても起動できません（`Asterism.Server.dll` が見つからない、というエラーになります）。上記コマンドなら `publish\` フォルダの中身（`Asterism.Server.exe` / `appsettings.json` / `wwwroot/`）は必要最小限のみになり、そのフォルダをまるごとサーバーPCにコピーするだけで動作します。
+
+以前に `bin\` `obj\` `publish\` が残った状態で再度publishすると、中間キャッシュの影響で `publish\` の中に不要なフォルダが入れ子で残ることがあります。気になる場合は `bin\` `obj\` `publish\` を削除してから publish し直してください。
 
 #### 2. 管理者パスワードを設定する
 
@@ -207,5 +209,6 @@ dotnet publish -c Release -r win-x64 --self-contained -p:PublishSingleFile=true 
 | **通信**                   | 現状HTTPのみ。社内LANのみの利用であればそのままでOK。外部公開する場合はIIS/nginxでリバースプロキシ＋HTTPS化を推奨                                                                                                                 |
 | **管理者パスワード**       | 管理者のみが知る運用とし、クライアントのappsettings.jsonには記載しない                                                                                                                                                            |
 | **wwwrootのバックアップ**  | `wwwroot/` 以下（manifest.json・tools/・icons/）が全資産。定期的にバックアップしてください                                                                                                                                        |
-| **クライアントの自己更新** | ツールID `tool-asterism-client`（Zip型）をAsterismに登録し、クライアントEXE入りZIPを配布すると、管理者がバージョンを上げたときに一般ユーザーへ更新通知が届き、カードの「更新」ボタンでダウンロード→再起動の流れで自動適用できます |
+| **クライアントの自己更新** | ツールID `tool-asterism-client`（Zip型）をAsterismに登録し、クライアントEXE入りZIPを配布すると、管理者がバージョンを上げたときに一般ユーザーへ更新通知が届き、カードの「更新」ボタンでダウンロード→再起動の流れで自動適用できます。特別な実装は不要で、他のツールと全く同じ登録・更新フローに乗るだけです（`ToolCardViewModel`が`tool-asterism-client`というIDを特別扱いし、更新完了後に「再起動して適用しますか？」の確認→exeの上書き→再起動、を自動で行います） |
+| **サーバー自体の更新**     | クライアントのような自己更新の仕組みはありません。新しい `Asterism.Server.exe` に差し替えてWindowsサービスを再起動する、という手動運用を想定しています（多数のPCに配るクライアントと違い、サーバーは常時稼働のインフラ側1台なので自動化の必要性が薄いため）                                                        |
 | **ポート変更**             | `appsettings.json` の `Kestrel:Endpoints:Http:Url` または起動引数 `--urls` で変更できます                                                                                                                                         |
