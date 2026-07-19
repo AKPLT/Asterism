@@ -35,6 +35,9 @@ public static class AdminToolsEndpoints
 
         group.MapDelete("/tools/{id}", async (string id, bool purge, ManifestStore store, IWebHostEnvironment env, CancellationToken ct) =>
         {
+            if (!IsSafeSegment(id))
+                return Results.BadRequest("idは英数字・ハイフン・アンダースコア・ドットのみ使用できます。");
+
             try
             {
                 string? iconUrl = null;
@@ -84,6 +87,9 @@ public static class AdminToolsEndpoints
         if (!IsSafeSegment(entry.Id) || !IsSafeSegment(entry.Version))
             return Results.BadRequest("idとversionは英数字・ハイフン・アンダースコア・ドットのみ使用できます。");
 
+        if (string.IsNullOrWhiteSpace(entry.ExecutablePath))
+            return Results.BadRequest("executablePathは必須です。");
+
         var package = form.Files["package"];
         if (package is null || package.Length == 0)
             return Results.BadRequest("packageファイルは必須です。");
@@ -121,6 +127,9 @@ public static class AdminToolsEndpoints
     private static async Task<IResult> UpdateToolAsync(
         string id, HttpRequest request, ManifestStore store, IWebHostEnvironment env, CancellationToken ct)
     {
+        if (!IsSafeSegment(id))
+            return Results.BadRequest("idは英数字・ハイフン・アンダースコア・ドットのみ使用できます。");
+
         if (!request.HasFormContentType)
             return Results.BadRequest("multipart/form-data で送信してください。");
 
@@ -137,6 +146,9 @@ public static class AdminToolsEndpoints
 
         if (entry is null || !IsSafeSegment(entry.Version))
             return Results.BadRequest("versionは英数字・ハイフン・アンダースコア・ドットのみ使用できます。");
+
+        if (string.IsNullOrWhiteSpace(entry.ExecutablePath))
+            return Results.BadRequest("executablePathは必須です。");
 
         entry.Id = id;
         entry.PackageType = PackageType.Zip;

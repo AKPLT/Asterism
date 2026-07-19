@@ -111,7 +111,7 @@ public partial class AdminToolEditViewModel : ObservableObject
                 .OrderBy(n => n, StringComparer.OrdinalIgnoreCase)
                 .ToList();
         }
-        catch (InvalidDataException)
+        catch (Exception)
         {
             return Array.Empty<string>();
         }
@@ -149,9 +149,9 @@ public partial class AdminToolEditViewModel : ObservableObject
                 ExecutablePath = relativePath.Replace('/', Path.DirectorySeparatorChar);
             }
         }
-        catch (InvalidDataException)
+        catch (Exception)
         {
-            // zipとして開けない場合は自動入力をあきらめ、手動入力に任せる
+            // zipとして開けない・exeが取り出せない等の場合は自動入力をあきらめ、手動入力に任せる
         }
     }
 
@@ -183,9 +183,9 @@ public partial class AdminToolEditViewModel : ObservableObject
             bitmapSource.Freeze();
             IconPreview = bitmapSource;
         }
-        catch (InvalidDataException)
+        catch (Exception)
         {
-            // zipとして開けない場合はプレビューをあきらめる
+            // zipとして開けない・アイコン抽出に失敗した等の場合はプレビューをあきらめる
         }
         finally
         {
@@ -289,6 +289,11 @@ public partial class AdminToolEditViewModel : ObservableObject
         if (string.IsNullOrWhiteSpace(Version))
         {
             ErrorMessage = "バージョンは必須です。";
+            return;
+        }
+        if (string.IsNullOrWhiteSpace(ExecutablePath))
+        {
+            ErrorMessage = "実行ファイルパスは必須です。";
             return;
         }
         if (_isNew && string.IsNullOrWhiteSpace(PackageFilePath))
