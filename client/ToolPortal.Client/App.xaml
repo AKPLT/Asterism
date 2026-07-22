@@ -1,0 +1,17 @@
+<Application x:Class="ToolPortal.Client.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:ToolPortal.Client"
+             xmlns:conv="clr-namespace:ToolPortal.Client.Converters">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Resources/ButtonStyles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            <conv:StringToImageSourceConverter x:Key="StringToImageSourceConverter" />
+            <conv:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
+            <conv:StringToBrushConverter x:Key="StringToBrushConverter" />
+            <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

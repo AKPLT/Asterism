@@ -1,25 +1,25 @@
-# Asterism
+# ToolPortal
 
 社内の各部署に散在するツールのダウンロード・アップデート・起動を一元管理する社内ツールポータル。
 
 - **サーバー**: 静的ファイル配信（manifest.json + ZIP配布）に加え、ツール登録・編集・削除を行う管理APIを持つASP.NET Core（管理APIにアプリ側の認証はない。後述の「注意事項」を参照）
-- **クライアント（Asterism.Client）**: C# WPF (.NET 8) デスクトップアプリ。一般利用者向けの一覧・インストール画面のみを持つ
-- **管理ツール（Asterism.Admin）**: クライアントとは別の単体WPFアプリ。ツールの登録・編集・削除を行う。管理者のみに配布する想定で、一般利用者向けクライアントには管理機能を一切含まない
-- **共有**: `ToolEntry`等のモデルはサーバー・クライアント・管理ツールで共有クラスライブラリ（`Asterism.Shared`）として共通化
+- **クライアント（ToolPortal.Client）**: C# WPF (.NET 8) デスクトップアプリ。一般利用者向けの一覧・インストール画面のみを持つ
+- **管理ツール（ToolPortal.Admin）**: クライアントとは別の単体WPFアプリ。ツールの登録・編集・削除を行う。管理者のみに配布する想定で、一般利用者向けクライアントには管理機能を一切含まない
+- **共有**: `ToolEntry`等のモデルはサーバー・クライアント・管理ツールで共有クラスライブラリ（`ToolPortal.Shared`）として共通化
 
 ## 構成
 
 ```
-Asterism/
+ToolPortal/
 ├── shared/
-│   └── Asterism.Shared/        サーバー・クライアント・管理ツール共有モデル (ToolEntry, ToolManifest, PackageType)
+│   └── ToolPortal.Shared/        サーバー・クライアント・管理ツール共有モデル (ToolEntry, ToolManifest, PackageType)
 ├── server/
-│   ├── Asterism.Server/        ASP.NET Core（静的ファイル配信 + 管理API）
+│   ├── ToolPortal.Server/        ASP.NET Core（静的ファイル配信 + 管理API）
 │   │   └── wwwroot/            manifest.json / icons / tools (配布物置き場)
 │   └── SampleTools/            デモ用ダミーツールのソース（DB Converter）
 └── client/
-    ├── Asterism.Client/        一般利用者向けWPFクライアント（一覧・インストール画面のみ）
-    └── Asterism.Admin/         管理者向けWPFアプリ（ツールの登録・編集・削除、管理者画面）
+    ├── ToolPortal.Client/        一般利用者向けWPFクライアント（一覧・インストール画面のみ）
+    └── ToolPortal.Admin/         管理者向けWPFアプリ（ツールの登録・編集・削除、管理者画面）
 ```
 
 ## 必要環境
@@ -32,7 +32,7 @@ Asterism/
 ### 1. サーバーを起動する
 
 ```powershell
-cd server\Asterism.Server
+cd server\ToolPortal.Server
 dotnet run
 ```
 
@@ -43,19 +43,19 @@ dotnet run
 別のターミナルで:
 
 ```powershell
-cd client\Asterism.Client
+cd client\ToolPortal.Client
 dotnet run
 ```
 
-起動すると `client/Asterism.Client/appsettings.json` の `Asterism:ServerBaseUrl`（既定 `http://localhost:5000/`）からツール一覧を取得し、一覧表示します。
+起動すると `client/ToolPortal.Client/appsettings.json` の `ToolPortal:ServerBaseUrl`（既定 `http://localhost:5000/`）からツール一覧を取得し、一覧表示します。
 
 ### Visual Studioで実行・ビルドする
 
-`Asterism.sln` をVisual Studio 2022（.NET 8 SDKワークロード）で開くだけで、CLIと同様にビルド・実行できます。
+`ToolPortal.sln` をVisual Studio 2022（.NET 8 SDKワークロード）で開くだけで、CLIと同様にビルド・実行できます。
 
 - **ビルド**: ソリューションエクスプローラーで「ソリューションのビルド」（既定ショートカット `Ctrl+Shift+B`）。
-- **実行**: 同梱の `Asterism.sln.slnLaunch` により、F5キーで **Asterism.Server と Asterism.Client が同時に起動**するよう複数スタートアッププロジェクトが設定済みです。個別に1つだけ実行したい場合はソリューションを右クリック→「スタートアッププロジェクトの設定」から変更してください。
-- 管理者画面（`Asterism.Admin`）は普段の開発ループには含めていません。動作確認したい場合は `Asterism.Admin` を右クリック→「スタートアッププロジェクトに設定」してF5するか、「スタートアッププロジェクトの設定」で一時的に複数スタートアップに追加してください。
+- **実行**: 同梱の `ToolPortal.sln.slnLaunch` により、F5キーで **ToolPortal.Server と ToolPortal.Client が同時に起動**するよう複数スタートアッププロジェクトが設定済みです。個別に1つだけ実行したい場合はソリューションを右クリック→「スタートアッププロジェクトの設定」から変更してください。
+- 管理者画面（`ToolPortal.Admin`）は普段の開発ループには含めていません。動作確認したい場合は `ToolPortal.Admin` を右クリック→「スタートアッププロジェクトに設定」してF5するか、「スタートアッププロジェクトの設定」で一時的に複数スタートアップに追加してください。
 
 ## 使い方（デモ）
 
@@ -68,18 +68,18 @@ dotnet run
 
 ### 更新フローを試す
 
-1. `server/Asterism.Server/wwwroot/manifest.json` の `tool-db-converter` の `version` と `downloadUrl` を書き換えて保存します（`server/Asterism.Server/wwwroot/tools/` には `db-converter-1.0.0.zip` と `db-converter-1.1.0.zip` の2バージョンを同梱済みです）。
+1. `server/ToolPortal.Server/wwwroot/manifest.json` の `tool-db-converter` の `version` と `downloadUrl` を書き換えて保存します（`server/ToolPortal.Server/wwwroot/tools/` には `db-converter-1.0.0.zip` と `db-converter-1.1.0.zip` の2バージョンを同梱済みです）。
 2. クライアントの「更新を確認」を押すと更新が検知され、対象カードのボタンが「更新」に変わります。
 
 ### 管理者画面（ツールの登録・編集）
 
-ツールの登録・編集は、`Asterism.Admin`（管理者専用の別アプリ）から行います。一般利用者向けクライアント（`Asterism.Client`）には管理機能は一切含まれません。パスワード等の認証はなく、`Asterism.Admin` を起動すればそのまま管理者画面（ツール一覧）が開きます（配布そのものを管理者に限定する運用のため。詳しくは「注意事項」を参照）。
+ツールの登録・編集は、`ToolPortal.Admin`（管理者専用の別アプリ）から行います。一般利用者向けクライアント（`ToolPortal.Client`）には管理機能は一切含まれません。パスワード等の認証はなく、`ToolPortal.Admin` を起動すればそのまま管理者画面（ツール一覧）が開きます（配布そのものを管理者に限定する運用のため。詳しくは「注意事項」を参照）。
 
-1. `client/Asterism.Admin/appsettings.json` の `ServerBaseUrl` を、対象サーバーに向けて設定します。
+1. `client/ToolPortal.Admin/appsettings.json` の `ServerBaseUrl` を、対象サーバーに向けて設定します。
    ```json
-   { "Asterism": { "ServerBaseUrl": "http://localhost:5000/" } }
+   { "ToolPortal": { "ServerBaseUrl": "http://localhost:5000/" } }
    ```
-2. `Asterism.Admin` を起動すると管理者画面が開き、「新規登録」「編集」「削除」が行えます。新規登録時はパッケージファイル（`.zip`）が必須です。アイコンは手動選択ではなく、パッケージ内の`executablePath`が指すexeから自動抽出されます（抽出できない場合はプレースホルダー表示）。
+2. `ToolPortal.Admin` を起動すると管理者画面が開き、「新規登録」「編集」「削除」が行えます。新規登録時はパッケージファイル（`.zip`）が必須です。アイコンは手動選択ではなく、パッケージ内の`executablePath`が指すexeから自動抽出されます（抽出できない場合はプレースホルダー表示）。
 3. 保存すると、サーバー側でパッケージ/アイコンが `wwwroot/tools/` `wwwroot/icons/` に配置され、`manifest.json` に反映されます。一般利用者の画面では「更新を確認」を押すと新しいツールがすぐに一覧へ反映されます。バージョンを変更する場合は新しいパッケージファイルの選択が必須です（ファイルなしでのバージョン変更はエラーになります）。
 
 **注意**: 削除ダイアログで「いいえ」を選ぶと `manifest.json` からエントリを取り除くのみで、サーバー上のパッケージ/アイコンファイルは残ります（誤操作時の復旧をしやすくするための挙動）。「はい」を選ぶと同じIDの全バージョンのパッケージ/アイコンファイルも同時に削除します（二段階確認あり）。
@@ -89,9 +89,9 @@ dotnet run
 インストール先とインストール状態は以下に保存されます（管理者権限不要）。
 
 - ツール本体: `%USERPROFILE%\Downloads\ToolPortal\<tool-id>\`（クライアントのインストール先変更ボタンで変更可）
-- インストール状態: `%LOCALAPPDATA%\Asterism\installed.json`
-- ユーザー設定（インストール先・お気に入り）: `%LOCALAPPDATA%\Asterism\user-settings.json`
-- manifestのオフラインキャッシュ: `%LOCALAPPDATA%\Asterism\manifest.cache.json`
+- インストール状態: `%LOCALAPPDATA%\ToolPortal\installed.json`
+- ユーザー設定（インストール先・お気に入り）: `%LOCALAPPDATA%\ToolPortal\user-settings.json`
+- manifestのオフラインキャッシュ: `%LOCALAPPDATA%\ToolPortal\manifest.cache.json`
 
 ## manifest.json の仕様
 
@@ -132,13 +132,13 @@ dotnet run
 ```
 社内ネットワーク
 ├── サーバーPC（1台）
-│   └── Asterism.Server.exe を常時起動（ポート5000）
+│   └── ToolPortal.Server.exe を常時起動（ポート5000）
 │
 ├── クライアントPC（各利用者）
-│   └── Asterism.Client.exe を配布・起動
+│   └── ToolPortal.Client.exe を配布・起動
 │
 └── 管理者PC（管理者のみ）
-    └── Asterism.Admin.exe を配布・起動（appsettings.json にServerBaseUrlを設定）
+    └── ToolPortal.Admin.exe を配布・起動（appsettings.json にServerBaseUrlを設定）
 ```
 
 ### サーバーのセットアップ
@@ -146,15 +146,15 @@ dotnet run
 #### 1. 単体EXEをビルドする
 
 ```powershell
-cd server\Asterism.Server
+cd server\ToolPortal.Server
 dotnet publish -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o publish\
 ```
 
-`-p:PublishSingleFile=true` を付けないと `Asterism.Server.exe` が実行に必要な大量のDLLに依存する構成になり、`exe`単体をコピーしても起動できません（`Asterism.Server.dll` が見つからない、というエラーになります）。上記コマンドなら `publish\` フォルダの中身（`Asterism.Server.exe` / `appsettings.json` / `wwwroot/`）は必要最小限のみになり、そのフォルダをまるごとサーバーPCにコピーするだけで動作します。
+`-p:PublishSingleFile=true` を付けないと `ToolPortal.Server.exe` が実行に必要な大量のDLLに依存する構成になり、`exe`単体をコピーしても起動できません（`ToolPortal.Server.dll` が見つからない、というエラーになります）。上記コマンドなら `publish\` フォルダの中身（`ToolPortal.Server.exe` / `appsettings.json` / `wwwroot/`）は必要最小限のみになり、そのフォルダをまるごとサーバーPCにコピーするだけで動作します。
 
 以前に `bin\` `obj\` `publish\` が残った状態で再度publishすると、中間キャッシュの影響で `publish\` の中に不要なフォルダが入れ子で残ることがあります。気になる場合は `bin\` `obj\` `publish\` を削除してから publish し直してください。
 
-**Visual Studioで発行する場合**: ソリューションエクスプローラーで `Asterism.Server` プロジェクトを右クリック→「発行」を選択すると、同梱の発行プロファイル（`Properties\PublishProfiles\FolderProfile.pubxml`）が自動的に読み込まれ、上記CLIコマンドと同じ設定（Release / win-x64 / self-contained / シングルファイル）で `publish\` フォルダ発行 が行えます。あとは「発行」ボタンを押すだけです。
+**Visual Studioで発行する場合**: ソリューションエクスプローラーで `ToolPortal.Server` プロジェクトを右クリック→「発行」を選択すると、同梱の発行プロファイル（`Properties\PublishProfiles\FolderProfile.pubxml`）が自動的に読み込まれ、上記CLIコマンドと同じ設定（Release / win-x64 / self-contained / シングルファイル）で `publish\` フォルダ発行 が行えます。あとは「発行」ボタンを押すだけです。
 
 #### 2. 他PCからアクセスできるようにする（重要）
 
@@ -177,9 +177,9 @@ dotnet publish -c Release -r win-x64 --self-contained -p:PublishSingleFile=true 
 NSSM（Non-Sucking Service Manager）を使うのが簡単です。
 
 ```powershell
-nssm install Asterism "C:\Asterism\Asterism.Server.exe"
-nssm set Asterism AppDirectory "C:\Asterism"
-nssm start Asterism
+nssm install ToolPortal "C:\ToolPortal\ToolPortal.Server.exe"
+nssm set ToolPortal AppDirectory "C:\ToolPortal"
+nssm start ToolPortal
 ```
 
 タスクスケジューラで「ログオン時に起動」にする方法でも構いません。
@@ -187,7 +187,7 @@ nssm start Asterism
 #### 4. ファイアウォールを設定する
 
 ```powershell
-netsh advfirewall firewall add rule name="Asterism" dir=in action=allow protocol=TCP localport=5000
+netsh advfirewall firewall add rule name="ToolPortal" dir=in action=allow protocol=TCP localport=5000
 ```
 
 上記の `Urls` 設定とファイアウォール開放の両方が揃って初めて他PCから疎通できます。片方だけでは繋がらないので、クライアントから接続できない場合はまずこの2点を疑ってください。
@@ -197,11 +197,11 @@ netsh advfirewall firewall add rule name="Asterism" dir=in action=allow protocol
 #### 1. 単体EXEをビルドする
 
 ```powershell
-cd client\Asterism.Client
+cd client\ToolPortal.Client
 dotnet publish -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o publish\
 ```
 
-**Visual Studioで発行する場合**: `Asterism.Client` プロジェクトを右クリック→「発行」で、同梱の発行プロファイル（`Properties\PublishProfiles\FolderProfile.pubxml`）が読み込まれ、同じ設定で `publish\` フォルダ発行が行えます。
+**Visual Studioで発行する場合**: `ToolPortal.Client` プロジェクトを右クリック→「発行」で、同梱の発行プロファイル（`Properties\PublishProfiles\FolderProfile.pubxml`）が読み込まれ、同じ設定で `publish\` フォルダ発行が行えます。
 
 #### 2. appsettings.json をサーバーに向ける
 
@@ -209,29 +209,29 @@ dotnet publish -c Release -r win-x64 --self-contained -p:PublishSingleFile=true 
 
 ```json
 {
-  "Asterism": {
+  "ToolPortal": {
     "ServerBaseUrl": "http://192.168.1.100:5000/",
     "PollingIntervalMinutes": 10
   }
 }
 ```
 
-この手順を省略しても、クライアント起動後にメニュー「ツール → サーバー設定...」からサーバーURLを変更できます（設定は `%LOCALAPPDATA%\Asterism\user-settings.json` に保存され、アプリ再起動不要で即座に反映されます）。サーバーの移設・IP変更時にも、配布物を作り直さずこの画面から追従できます。
+この手順を省略しても、クライアント起動後にメニュー「ツール → サーバー設定...」からサーバーURLを変更できます（設定は `%LOCALAPPDATA%\ToolPortal\user-settings.json` に保存され、アプリ再起動不要で即座に反映されます）。サーバーの移設・IP変更時にも、配布物を作り直さずこの画面から追従できます。
 
 #### 3. 各PCに配布する
 
 `publish\` フォルダ（EXEと appsettings.json）を各クライアントPCに展開するだけで動作します。.NETランタイムのインストールは不要です。
 
-### 管理者ツール（Asterism.Admin）の配布
+### 管理者ツール（ToolPortal.Admin）の配布
 
 #### 1. 単体EXEをビルドする
 
 ```powershell
-cd client\Asterism.Admin
+cd client\ToolPortal.Admin
 dotnet publish -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o publish\
 ```
 
-**Visual Studioで発行する場合**: `Asterism.Admin` プロジェクトを右クリック→「発行」で、同梱の発行プロファイル（`Properties\PublishProfiles\FolderProfile.pubxml`）が読み込まれ、同じ設定で `publish\` フォルダ発行が行えます。
+**Visual Studioで発行する場合**: `ToolPortal.Admin` プロジェクトを右クリック→「発行」で、同梱の発行プロファイル（`Properties\PublishProfiles\FolderProfile.pubxml`）が読み込まれ、同じ設定で `publish\` フォルダ発行が行えます。
 
 #### 2. appsettings.json を設定する
 
@@ -239,13 +239,13 @@ dotnet publish -c Release -r win-x64 --self-contained -p:PublishSingleFile=true 
 
 ```json
 {
-  "Asterism": {
+  "ToolPortal": {
     "ServerBaseUrl": "http://192.168.1.100:5000/"
   }
 }
 ```
 
-`Asterism.Admin` は起動すると認証なしにそのまま管理者画面を開きます。管理APIそのものにアプリ層の認証がないため（詳しくは「注意事項」を参照）、**`publish\` フォルダは管理者本人にのみ配布してください**。
+`ToolPortal.Admin` は起動すると認証なしにそのまま管理者画面を開きます。管理APIそのものにアプリ層の認証がないため（詳しくは「注意事項」を参照）、**`publish\` フォルダは管理者本人にのみ配布してください**。
 
 #### 3. 管理者に配布する
 
@@ -257,8 +257,8 @@ dotnet publish -c Release -r win-x64 --self-contained -p:PublishSingleFile=true 
 | -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **通信**                   | 現状HTTPのみ。社内LAN内での利用のみを想定                                                                                                                                                                                          |
 | **他PCから繋がらない場合** | サーバー側の `appsettings.json` に `Urls: "http://0.0.0.0:5000"` の設定漏れ、またはファイアウォール未開放が原因のことが多い（「サーバーのセットアップ」手順2・4を参照）。クライアントは接続失敗時にローカルキャッシュへ静かにフォールバックするため、症状だけでは気づきにくい |
-| **管理API（`/api/admin/*`）の認証** | アプリ層の認証は行っていない。サーバーの `/api/admin/*` に到達できるネットワーク上の誰でも、`Asterism.Admin` を使わずとも直接HTTPリクエストでツールの登録・編集・削除が行える。ファイアウォール・VLAN等でサーバーへの到達性を信頼できる端末（管理者PC等）に絞ることを推奨する |
+| **管理API（`/api/admin/*`）の認証** | アプリ層の認証は行っていない。サーバーの `/api/admin/*` に到達できるネットワーク上の誰でも、`ToolPortal.Admin` を使わずとも直接HTTPリクエストでツールの登録・編集・削除が行える。ファイアウォール・VLAN等でサーバーへの到達性を信頼できる端末（管理者PC等）に絞ることを推奨する |
 | **wwwrootのバックアップ**  | `wwwroot/` 以下（manifest.json・tools/・icons/）が全資産。定期的にバックアップしてください                                                                                                                                        |
-| **クライアントの自己更新** | ツールID `tool-asterism-client`（Zip型）をAsterismに登録し、クライアントEXE入りZIPを配布すると、管理者がバージョンを上げたときに一般ユーザーへ更新通知が届き、カードの「更新」ボタンでダウンロード→再起動の流れで自動適用できます。特別な実装は不要で、他のツールと全く同じ登録・更新フローに乗るだけです（`ToolCardViewModel`が`tool-asterism-client`というIDを特別扱いし、更新完了後に「再起動して適用しますか？」の確認→exeの上書き→再起動、を自動で行います） |
-| **サーバー自体の更新**     | クライアントのような自己更新の仕組みはありません。新しい `Asterism.Server.exe` に差し替えてWindowsサービスを再起動する、という手動運用を想定しています（多数のPCに配るクライアントと違い、サーバーは常時稼働のインフラ側1台なので自動化の必要性が薄いため）                                                        |
+| **クライアントの自己更新** | ツールID `tool-toolportal-client`（Zip型）をToolPortalに登録し、クライアントEXE入りZIPを配布すると、管理者がバージョンを上げたときに一般ユーザーへ更新通知が届き、カードの「更新」ボタンでダウンロード→再起動の流れで自動適用できます。特別な実装は不要で、他のツールと全く同じ登録・更新フローに乗るだけです（`ToolCardViewModel`が`tool-toolportal-client`というIDを特別扱いし、更新完了後に「再起動して適用しますか？」の確認→exeの上書き→再起動、を自動で行います） |
+| **サーバー自体の更新**     | クライアントのような自己更新の仕組みはありません。新しい `ToolPortal.Server.exe` に差し替えてWindowsサービスを再起動する、という手動運用を想定しています（多数のPCに配るクライアントと違い、サーバーは常時稼働のインフラ側1台なので自動化の必要性が薄いため）                                                        |
 | **ポート変更**             | `appsettings.json` の `Kestrel:Endpoints:Http:Url` または起動引数 `--urls` で変更できます                                                                                                                                         |

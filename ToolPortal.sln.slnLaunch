@@ -1,0 +1,15 @@
+[
+  {
+    "Name": "Current selection",
+    "Projects": [
+      {
+        "Path": "server\\ToolPortal.Server\\ToolPortal.Server.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "client\\ToolPortal.Client\\ToolPortal.Client.csproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]

@@ -1,0 +1,282 @@
+using System.Diagnostics;
+using System.IO;
+using System.Windows;
+using ToolPortal.Client.Models;
+using ToolPortal.Client.Services;
+using ToolPortal.Client.Services.Exceptions;
+using ToolPortal.Shared.Models;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+
+namespace ToolPortal.Client.ViewModels;
+
+public enum ToolCardState
+{
+    NotInstalled,
+    Installed,
+    UpdateAvailable
+}
+
+public partial class ToolCardViewModel : ObservableObject
+{
+    private readonly IInstallService _installService;
+    private readonly ILaunchService _launchService;
+    private readonly IUninstallService _uninstallService;
+    private readonly ILocalStateService _localStateService;
+    private readonly IUserSettingsService _userSettingsService;
+
+    private InstalledToolRecord? _installedRecord;
+
+    public ToolEntry Tool { get; private set; }
+    public Action<string>? OnTagClicked { get; set; }
+    public Action? OnFavoriteToggled { get; set; }
+
+    public bool IsFavorite => _userSettingsService.IsFavorite(Tool.Id);
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(PrimaryButtonLabel))]
+    [NotifyPropertyChangedFor(nameof(IsUpdateAvailable))]
+    [NotifyPropertyChangedFor(nameof(IsLatest))]
+    [NotifyCanExecuteChangedFor(nameof(UninstallCommand))]
+    private ToolCardState state;
+
+    public bool IsUpdateAvailable => State == ToolCardState.UpdateAvailable;
+    public bool IsLatest => State == ToolCardState.Installed;
+    public string VersionText => Tool.Version;
+    public bool HasIcon => !string.IsNullOrEmpty(Tool.IconUrl);
+    public bool NoIcon => string.IsNullOrEmpty(Tool.IconUrl);
+    public string InitialLetter => string.IsNullOrEmpty(Tool.Name) ? "?" : Tool.Name[0].ToString().ToUpperInvariant();
+    public string InitialColor => _palette[Math.Abs((Tool.Name ?? "").GetHashCode()) % _palette.Length];
+
+    private static readonly string[] _palette =
+        ["#4F46E5", "#0284C7", "#059669", "#D97706", "#DC2626", "#7C3AED", "#DB2777", "#0891B2"];
+
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(PrimaryActionCommand))]
+    [NotifyCanExecuteChangedFor(nameof(UninstallCommand))]
+    private bool isBusy;
+
+    [ObservableProperty]
+    private double progressPercent;
+
+    [ObservableProperty]
+    private string? errorMessage;
+
+    public string Name => Tool.Name;
+    public string Description => Tool.Description;
+    public string Category => Tool.Category;
+    public IReadOnlyList<string> Tags => Tool.Tags;
+    public string IconUrl => Tool.IconUrl;
+
+    public string PrimaryButtonLabel => State switch
+    {
+        ToolCardState.NotInstalled => "インストール",
+        ToolCardState.UpdateAvailable => "更新",
+        _ => "起動"
+    };
+
+    public ToolCardViewModel(
+        ToolEntry tool,
+        IInstallService installService,
+        ILaunchService launchService,
+        IUninstallService uninstallService,
+        ILocalStateService localStateService,
+        IUserSettingsService userSettingsService)
+    {
+        Tool = tool;
+        _installService = installService;
+        _launchService = launchService;
+        _uninstallService = uninstallService;
+        _localStateService = localStateService;
+        _userSettingsService = userSettingsService;
+
+        RefreshState();
+    }
+
+    public void UpdateTool(ToolEntry tool)
+    {
+        Tool = tool;
+        OnPropertyChanged(nameof(Name));
+        OnPropertyChanged(nameof(Description));
+        OnPropertyChanged(nameof(Category));
+        OnPropertyChanged(nameof(Tags));
+        OnPropertyChanged(nameof(IconUrl));
+        OnPropertyChanged(nameof(VersionText));
+        OnPropertyChanged(nameof(HasIcon));
+        OnPropertyChanged(nameof(NoIcon));
+        OnPropertyChanged(nameof(InitialLetter));
+        OnPropertyChanged(nameof(InitialColor));
+        RefreshState();
+    }
+
+    public void RefreshState()
+    {
+        _installedRecord = _localStateService.GetRecord(Tool.Id);
+        if (_installedRecord == null)
+        {
+            State = ToolCardState.NotInstalled;
+            return;
+        }
+
+        var expectedInstallPath = Path.Combine(_localStateService.ToolsRootDirectory, Tool.Id);
+        var isUnderCurrentRoot = string.Equals(
+            Path.GetFullPath(_installedRecord.InstallPath).TrimEnd(Path.DirectorySeparatorChar),
+            Path.GetFullPath(expectedInstallPath).TrimEnd(Path.DirectorySeparatorChar),
+            StringComparison.OrdinalIgnoreCase);
+        var exeExists = File.Exists(Path.Combine(_installedRecord.InstallPath, Tool.ExecutablePath));
+
+        if (!isUnderCurrentRoot || !exeExists)
+        {
+            _installedRecord = null;
+            State = ToolCardState.NotInstalled;
+            return;
+        }
+
+        State = string.Equals(Tool.Version, _installedRecord.Version, StringComparison.Ordinal)
+            ? ToolCardState.Installed
+            : ToolCardState.UpdateAvailable;
+    }
+
+    [RelayCommand(CanExecute = nameof(CanPrimaryAction))]
+    private async Task PrimaryActionAsync(CancellationToken ct)
+    {
+        if (State == ToolCardState.Installed && _installedRecord != null)
+        {
+            LaunchInternal();
+            return;
+        }
+
+        await InstallOrUpdateInternalAsync(ct);
+    }
+
+    private bool CanPrimaryAction() => !IsBusy;
+
+    private void LaunchInternal()
+    {
+        ErrorMessage = null;
+        try
+        {
+            _launchService.Launch(Tool, _installedRecord!);
+        }
+        catch (LaunchFailedException ex)
+        {
+            ErrorMessage = ex.Message;
+            RefreshState();
+        }
+    }
+
+    private const string SelfUpdateToolId = "tool-toolportal-client";
+
+    private async Task InstallOrUpdateInternalAsync(CancellationToken ct)
+    {
+        if (_installedRecord is null)
+        {
+            var expectedInstallPath = Path.Combine(_localStateService.ToolsRootDirectory, Tool.Id);
+            if (Directory.Exists(expectedInstallPath))
+            {
+                var result = MessageBox.Show(
+                    $"インストール先に既存のフォルダがあります:\n{expectedInstallPath}\n\nこのフォルダの中身は削除されてから新規インストールされます。続行しますか？",
+                    "確認",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Warning);
+                if (result != MessageBoxResult.Yes) return;
+            }
+        }
+
+        IsBusy = true;
+        ErrorMessage = null;
+        ProgressPercent = 0;
+
+        try
+        {
+            var progress = new Progress<double>(p => ProgressPercent = p);
+            _installedRecord = await _installService.InstallOrUpdateAsync(Tool, progress, ct);
+            State = ToolCardState.Installed;
+
+            if (Tool.Id == SelfUpdateToolId)
+            {
+                OfferSelfUpdateRestart();
+            }
+        }
+        catch (PackageCorruptException ex)
+        {
+            ErrorMessage = ex.Message;
+        }
+        catch (InstallerFailedException ex)
+        {
+            ErrorMessage = ex.Message;
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    private void OfferSelfUpdateRestart()
+    {
+        var newExePath = Path.Combine(_installedRecord!.InstallPath, Tool.ExecutablePath);
+        if (!File.Exists(newExePath)) return;
+
+        var result = MessageBox.Show(
+            "クライアントの更新が完了しました。今すぐ再起動して適用しますか？",
+            "更新の適用",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Question);
+
+        if (result != MessageBoxResult.Yes) return;
+
+        var currentExe = Environment.ProcessPath;
+        if (string.IsNullOrEmpty(currentExe)) return;
+
+        var script = Path.Combine(Path.GetTempPath(), "toolportal-update.cmd");
+        File.WriteAllText(script, $"""
+            @echo off
+            timeout /t 2 /nobreak > nul
+            copy /y "{newExePath}" "{currentExe}"
+            start "" "{currentExe}"
+            del "%~f0"
+            """);
+
+        Process.Start(new ProcessStartInfo("cmd", $"/c \"{script}\"")
+        {
+            CreateNoWindow = true,
+            UseShellExecute = true
+        });
+
+        Application.Current.Shutdown();
+    }
+
+    [RelayCommand(CanExecute = nameof(CanUninstall))]
+    private void Uninstall()
+    {
+        if (_installedRecord == null)
+        {
+            return;
+        }
+
+        try
+        {
+            _uninstallService.Uninstall(Tool, _installedRecord);
+            _installedRecord = null;
+            State = ToolCardState.NotInstalled;
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+        {
+            ErrorMessage = "ツールが実行中の可能性があります。終了してから再度お試しください。";
+        }
+    }
+
+    private bool CanUninstall() => !IsBusy && State != ToolCardState.NotInstalled;
+
+    [RelayCommand]
+    private void SelectTag(string tag) => OnTagClicked?.Invoke(tag);
+
+    [RelayCommand]
+    private void ToggleFavorite()
+    {
+        _userSettingsService.ToggleFavorite(Tool.Id);
+        _userSettingsService.Save();
+        OnPropertyChanged(nameof(IsFavorite));
+        OnFavoriteToggled?.Invoke();
+    }
+}
