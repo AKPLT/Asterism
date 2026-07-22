@@ -402,6 +402,9 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+
+# Visual Studio user-specific multi-startup project settings
+*.slnLaunch.user
 .idea
 
 ##

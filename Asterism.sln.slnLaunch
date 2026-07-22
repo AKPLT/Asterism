@@ -1,0 +1,15 @@
+[
+  {
+    "Name": "Current selection",
+    "Projects": [
+      {
+        "Path": "server\\Asterism.Server\\Asterism.Server.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "client\\Asterism.Client\\Asterism.Client.csproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]
