@@ -10,6 +10,8 @@
     <Menu DockPanel.Dock="Top">
         <MenuItem Header="ツール">
             <MenuItem Header="管理者モード" Click="OnAdminModeClick" />
+            <Separator />
+            <MenuItem Header="サーバー設定..." Click="OnServerSettingsClick" />
         </MenuItem>
         <MenuItem Header="ヘルプ">
             <MenuItem Header="バージョン情報" Click="OnAboutClick" />

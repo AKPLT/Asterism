@@ -228,6 +228,8 @@ dotnet publish -c Release -r win-x64 --self-contained -p:PublishSingleFile=true 
 }
 ```
 
+この手順を省略しても、クライアント起動後にメニュー「ツール → サーバー設定...」からサーバーURLを変更できます（設定は `%LOCALAPPDATA%\Asterism\user-settings.json` に保存され、アプリ再起動不要で即座に反映されます）。サーバーの移設・IP変更時にも、配布物を作り直さずこの画面から追従できます。
+
 #### 3. 各PCに配布する
 
 `publish\` フォルダ（EXEと appsettings.json）を各クライアントPCに展開するだけで動作します。.NETランタイムのインストールは不要です。

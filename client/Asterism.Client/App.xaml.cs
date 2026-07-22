@@ -25,14 +25,15 @@ public partial class App : Application
             {
                 services.Configure<AsterismOptions>(context.Configuration.GetSection("Asterism"));
 
+                services.AddSingleton<IUserSettingsService, UserSettingsService>();
+
                 services.AddHttpClient("AsterismServer", (sp, client) =>
                 {
-                    var options = sp.GetRequiredService<IOptions<AsterismOptions>>().Value;
-                    client.BaseAddress = new Uri(options.ServerBaseUrl);
+                    var userSettings = sp.GetRequiredService<IUserSettingsService>();
+                    client.BaseAddress = new Uri(userSettings.ServerBaseUrl);
                     client.Timeout = TimeSpan.FromMinutes(30);
                 });
 
-                services.AddSingleton<IUserSettingsService, UserSettingsService>();
                 services.AddSingleton<IManifestService, ManifestService>();
                 services.AddSingleton<ILocalStateService, LocalStateService>();
                 services.AddSingleton<IInstallService, InstallService>();
@@ -48,13 +49,14 @@ public partial class App : Application
                 services.AddTransient<AdminWindow>();
                 services.AddTransient<AdminToolEditViewModel>();
                 services.AddTransient<AdminToolEditWindow>();
+                services.AddTransient<ServerSettingsDialog>();
             })
             .Build();
 
         await _host.StartAsync();
 
-        var options = _host.Services.GetRequiredService<IOptions<AsterismOptions>>().Value;
-        StringToImageSourceConverter.BaseUri = new Uri(options.ServerBaseUrl);
+        var userSettings = _host.Services.GetRequiredService<IUserSettingsService>();
+        StringToImageSourceConverter.BaseUri = new Uri(userSettings.ServerBaseUrl);
 
         var mainWindow = _host.Services.GetRequiredService<MainWindow>();
         mainWindow.Show();

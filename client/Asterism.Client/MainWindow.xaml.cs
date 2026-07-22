@@ -115,6 +115,16 @@ public partial class MainWindow : Window
         }
     }
 
+    private async void OnServerSettingsClick(object sender, RoutedEventArgs e)
+    {
+        var dialog = _serviceProvider.GetRequiredService<ServerSettingsDialog>();
+        dialog.Owner = this;
+        if (dialog.ShowDialog() == true)
+        {
+            await _viewModel.RefreshManifestCommand.ExecuteAsync(null);
+        }
+    }
+
     private void OnAboutClick(object sender, RoutedEventArgs e)
     {
         var win = new Views.AboutWindow { Owner = this };

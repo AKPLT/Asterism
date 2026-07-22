@@ -1,6 +1,8 @@
 using System.IO;
 using System.Text.Json;
 using Asterism.Client.Models;
+using Asterism.Client.Options;
+using Microsoft.Extensions.Options;
 
 namespace Asterism.Client.Services;
 
@@ -8,6 +10,7 @@ public sealed class UserSettingsService : IUserSettingsService
 {
     private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
     private readonly string _path;
+    private readonly string _defaultServerBaseUrl;
     private readonly UserSettings _settings;
 
     public string ToolsDirectory
@@ -16,8 +19,15 @@ public sealed class UserSettingsService : IUserSettingsService
         set => _settings.ToolsDirectory = value;
     }
 
-    public UserSettingsService()
+    public string ServerBaseUrl
     {
+        get => _settings.ServerBaseUrl is { Length: > 0 } url ? url : _defaultServerBaseUrl;
+        set => _settings.ServerBaseUrl = value;
+    }
+
+    public UserSettingsService(IOptions<AsterismOptions> options)
+    {
+        _defaultServerBaseUrl = options.Value.ServerBaseUrl;
         _path = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "Asterism", "user-settings.json");
