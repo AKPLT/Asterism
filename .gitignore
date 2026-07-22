@@ -194,6 +194,7 @@ publish/
 # 配布用folder発行プロファイル（機密情報を含まないためリポジトリに含める）
 !server/Asterism.Server/Properties/PublishProfiles/FolderProfile.pubxml
 !client/Asterism.Client/Properties/PublishProfiles/FolderProfile.pubxml
+!client/Asterism.Admin/Properties/PublishProfiles/FolderProfile.pubxml
 *.publishproj
 
 # Microsoft Azure Web App publish settings. Comment the next line if you want to

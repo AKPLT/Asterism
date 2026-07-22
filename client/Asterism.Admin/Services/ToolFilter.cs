@@ -1,14 +1,10 @@
 using Asterism.Shared.Models;
 
-namespace Asterism.Client.Services;
+namespace Asterism.Admin.Services;
 
-/// <summary>一覧画面(MainViewModel)の検索・カテゴリ絞り込みロジック。</summary>
 public static class ToolFilter
 {
     public const string AllCategoriesLabel = "すべて";
-    public const string FavoritesLabel = "お気に入り";
-    public const string InstalledLabel = "インストール済み";
-    public const string SeparatorLabel = "__separator__";
 
     public static bool Matches(ToolEntry tool, string? searchText, string selectedCategory)
     {

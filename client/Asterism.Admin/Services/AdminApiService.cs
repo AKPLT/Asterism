@@ -1,19 +1,16 @@
 using System.IO;
-using System.Net;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Asterism.Client.Services.Exceptions;
+using Asterism.Admin.Services.Exceptions;
 using Asterism.Shared.Models;
 
-namespace Asterism.Client.Services;
+namespace Asterism.Admin.Services;
 
 public sealed class AdminApiService : IAdminApiService
 {
     private readonly IHttpClientFactory _httpClientFactory;
-    private string? _adminKey;
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -21,38 +18,10 @@ public sealed class AdminApiService : IAdminApiService
         Converters = { new JsonStringEnumConverter() }
     };
 
-    public bool IsUnlocked => _adminKey is not null;
-
     public AdminApiService(IHttpClientFactory httpClientFactory)
     {
         _httpClientFactory = httpClientFactory;
     }
-
-    public async Task<bool> TryUnlockAsync(string adminKey, CancellationToken ct = default)
-    {
-        try
-        {
-            var client = _httpClientFactory.CreateClient("AsterismServer");
-            using var request = new HttpRequestMessage(HttpMethod.Get, "api/admin/ping");
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", adminKey);
-            using var response = await client.SendAsync(request, ct);
-
-            if (response.StatusCode == HttpStatusCode.Unauthorized)
-            {
-                return false;
-            }
-
-            response.EnsureSuccessStatusCode();
-            _adminKey = adminKey;
-            return true;
-        }
-        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException)
-        {
-            throw new AdminApiException("サーバーに接続できません。", ex);
-        }
-    }
-
-    public void Lock() => _adminKey = null;
 
     public async Task<List<ToolEntry>> GetToolsAsync(CancellationToken ct = default)
     {
@@ -98,16 +67,10 @@ public sealed class AdminApiService : IAdminApiService
 
     private async Task<HttpResponseMessage> SendAsync(HttpMethod method, string requestUri, HttpContent? content, CancellationToken ct)
     {
-        if (_adminKey is null)
-        {
-            throw new AdminApiException("管理者モードがロックされています。");
-        }
-
         try
         {
             var client = _httpClientFactory.CreateClient("AsterismServer");
             using var request = new HttpRequestMessage(method, requestUri) { Content = content };
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _adminKey);
 
             var response = await client.SendAsync(request, ct);
             if (!response.IsSuccessStatusCode)

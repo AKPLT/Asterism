@@ -2,13 +2,13 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Data;
-using Asterism.Client.Services;
-using Asterism.Client.Services.Exceptions;
+using Asterism.Admin.Services;
+using Asterism.Admin.Services.Exceptions;
 using Asterism.Shared.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
-namespace Asterism.Client.ViewModels;
+namespace Asterism.Admin.ViewModels;
 
 public partial class AdminViewModel : ObservableObject
 {

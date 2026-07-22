@@ -1,14 +1,9 @@
 using Asterism.Shared.Models;
 
-namespace Asterism.Client.Services;
+namespace Asterism.Admin.Services;
 
 public interface IAdminApiService
 {
-    bool IsUnlocked { get; }
-
-    Task<bool> TryUnlockAsync(string adminKey, CancellationToken ct = default);
-    void Lock();
-
     Task<List<ToolEntry>> GetToolsAsync(CancellationToken ct = default);
     Task<ToolEntry> CreateToolAsync(ToolEntry metadata, string packageFilePath, CancellationToken ct = default);
     Task<ToolEntry> UpdateToolAsync(string id, ToolEntry metadata, string? packageFilePath, CancellationToken ct = default);

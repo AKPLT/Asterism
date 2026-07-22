@@ -102,19 +102,6 @@ public partial class MainWindow : Window
         base.OnClosed(e);
     }
 
-    private void OnAdminModeClick(object sender, RoutedEventArgs e)
-    {
-        var dialog = _serviceProvider.GetRequiredService<PasswordDialog>();
-        dialog.Owner = this;
-        if (dialog.ShowDialog() == true)
-        {
-            var adminWindow = _serviceProvider.GetRequiredService<AdminWindow>();
-            adminWindow.Owner = this;
-            adminWindow.Closed += (_, _) => Activate();
-            adminWindow.Show();
-        }
-    }
-
     private async void OnServerSettingsClick(object sender, RoutedEventArgs e)
     {
         var dialog = _serviceProvider.GetRequiredService<ServerSettingsDialog>();

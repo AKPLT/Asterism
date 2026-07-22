@@ -4,30 +4,27 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using Asterism.Client.Services;
-using Asterism.Client.ViewModels;
+using Asterism.Admin.Services;
+using Asterism.Admin.ViewModels;
 using Asterism.Shared.Models;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Asterism.Client.Views;
+namespace Asterism.Admin.Views;
 
 public partial class AdminWindow : Window
 {
     private readonly AdminViewModel _viewModel;
     private readonly IServiceProvider _serviceProvider;
-    private readonly IAdminApiService _adminApiService;
 
-    public AdminWindow(AdminViewModel viewModel, IServiceProvider serviceProvider, IAdminApiService adminApiService)
+    public AdminWindow(AdminViewModel viewModel, IServiceProvider serviceProvider)
     {
         InitializeComponent();
 
         _viewModel = viewModel;
         _serviceProvider = serviceProvider;
-        _adminApiService = adminApiService;
         DataContext = _viewModel;
 
         Loaded += async (_, _) => await _viewModel.LoadCommand.ExecuteAsync(null);
-        Closed += (_, _) => _adminApiService.Lock();
     }
 
     private async void OnAddNewClick(object sender, RoutedEventArgs e)

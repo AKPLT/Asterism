@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Input;
 
-namespace Asterism.Client.Views;
+namespace Asterism.Admin.Views;
 
 public partial class ExecutablePickerWindow : Window
 {

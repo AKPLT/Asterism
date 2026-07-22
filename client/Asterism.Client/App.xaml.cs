@@ -39,16 +39,10 @@ public partial class App : Application
                 services.AddSingleton<IInstallService, InstallService>();
                 services.AddSingleton<ILaunchService, LaunchService>();
                 services.AddSingleton<IUninstallService, UninstallService>();
-                services.AddSingleton<IAdminApiService, AdminApiService>();
 
                 services.AddSingleton<MainViewModel>();
                 services.AddSingleton<MainWindow>();
 
-                services.AddTransient<PasswordDialog>();
-                services.AddTransient<AdminViewModel>();
-                services.AddTransient<AdminWindow>();
-                services.AddTransient<AdminToolEditViewModel>();
-                services.AddTransient<AdminToolEditWindow>();
                 services.AddTransient<ServerSettingsDialog>();
             })
             .Build();

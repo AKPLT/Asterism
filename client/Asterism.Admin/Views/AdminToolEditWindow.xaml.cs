@@ -1,8 +1,8 @@
 using System.Windows;
-using Asterism.Client.ViewModels;
+using Asterism.Admin.ViewModels;
 using Asterism.Shared.Models;
 
-namespace Asterism.Client.Views;
+namespace Asterism.Admin.Views;
 
 public partial class AdminToolEditWindow : Window
 {

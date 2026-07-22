@@ -1,4 +1,4 @@
-<Window x:Class="Asterism.Client.Views.ExecutablePickerWindow"
+<Window x:Class="Asterism.Admin.Views.ExecutablePickerWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="実行ファイルの選択" Width="440" SizeToContent="Height"

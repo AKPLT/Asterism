@@ -1,4 +1,4 @@
-namespace Asterism.Client.Services.Exceptions;
+namespace Asterism.Admin.Services.Exceptions;
 
 public sealed class AdminApiException : Exception
 {

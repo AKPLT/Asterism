@@ -22,8 +22,6 @@ public static class AdminToolsEndpoints
     {
         var group = app.MapGroup("/api/admin");
 
-        group.MapGet("/ping", () => Results.NoContent());
-
         group.MapGet("/tools", async (ManifestStore store, CancellationToken ct) =>
         {
             var manifest = await store.ReadAsync(ct);
