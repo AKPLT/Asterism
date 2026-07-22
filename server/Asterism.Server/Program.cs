@@ -28,6 +28,7 @@ app.UseStaticFiles(new StaticFileOptions
     ServeUnknownFileTypes = false
 });
 
+app.UseMiddleware<AdminAuthMiddleware>();
 app.MapAdminToolsEndpoints();
 
 app.Run();

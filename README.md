@@ -2,7 +2,7 @@
 
 社内の各部署に散在するツールのダウンロード・アップデート・起動を一元管理する社内ツールポータル。
 
-- **サーバー**: 静的ファイル配信（manifest.json + ZIP配布）に加え、ツール登録・編集・削除を行う管理APIを持つASP.NET Core（管理APIにアプリ側の認証はない。後述の「注意事項」を参照）
+- **サーバー**: 静的ファイル配信（manifest.json + ZIP配布）に加え、認証付きの管理API（ツール登録・編集・削除）を持つASP.NET Core
 - **クライアント（Asterism.Client）**: C# WPF (.NET 8) デスクトップアプリ。一般利用者向けの一覧・インストール画面のみを持つ
 - **管理ツール（Asterism.Admin）**: クライアントとは別の単体WPFアプリ。ツールの登録・編集・削除を行う。管理者のみに配布する想定で、一般利用者向けクライアントには管理機能を一切含まない
 - **共有**: `ToolEntry`等のモデルはサーバー・クライアント・管理ツールで共有クラスライブラリ（`Asterism.Shared`）として共通化
@@ -73,14 +73,19 @@ dotnet run
 
 ### 管理者画面（ツールの登録・編集）
 
-ツールの登録・編集は、`Asterism.Admin`（管理者専用の別アプリ）から行います。一般利用者向けクライアント（`Asterism.Client`）には管理機能は一切含まれません。パスワード等の認証はなく、`Asterism.Admin` を起動すればそのまま管理者画面（ツール一覧）が開きます（配布そのものを管理者に限定する運用のため。詳しくは「注意事項」を参照）。
+ツールの登録・編集は、`Asterism.Admin`（管理者専用の別アプリ）から行います。一般利用者向けクライアント（`Asterism.Client`）には管理機能は一切含まれません。
 
-1. `client/Asterism.Admin/appsettings.json` の `ServerBaseUrl` を、対象サーバーに向けて設定します。
+1. サーバーの `appsettings.json`（本番）または `appsettings.Development.json`（開発、既定値 `admin`）で管理者パスワードを設定します。
    ```json
-   { "Asterism": { "ServerBaseUrl": "http://localhost:5000/" } }
+   { "Asterism": { "AdminApiKey": "任意の管理者パスワード" } }
    ```
-2. `Asterism.Admin` を起動すると管理者画面が開き、「新規登録」「編集」「削除」が行えます。新規登録時はパッケージファイル（`.zip`）が必須です。アイコンは手動選択ではなく、パッケージ内の`executablePath`が指すexeから自動抽出されます（抽出できない場合はプレースホルダー表示）。
-3. 保存すると、サーバー側でパッケージ/アイコンが `wwwroot/tools/` `wwwroot/icons/` に配置され、`manifest.json` に反映されます。一般利用者の画面では「更新を確認」を押すと新しいツールがすぐに一覧へ反映されます。バージョンを変更する場合は新しいパッケージファイルの選択が必須です（ファイルなしでのバージョン変更はエラーになります）。
+2. `client/Asterism.Admin/appsettings.json` の `ServerBaseUrl` と `AdminApiKey`（サーバー側と同じ値）を設定します。
+   ```json
+   { "Asterism": { "ServerBaseUrl": "http://localhost:5000/", "AdminApiKey": "任意の管理者パスワード" } }
+   ```
+3. `Asterism.Admin` を起動すると、この設定値でサーバーに自動認証し、そのまま管理者画面（ツール一覧）が開きます。入力画面によるパスワード入力は行いません（配布そのものを管理者に限定する運用のため）。キーが一致しない場合、管理APIは401を返し、画面にはエラーメッセージが表示されます。
+4. 管理者画面で「新規登録」「編集」「削除」が行えます。新規登録時はパッケージファイル（`.zip`）が必須です。アイコンは手動選択ではなく、パッケージ内の`executablePath`が指すexeから自動抽出されます（抽出できない場合はプレースホルダー表示）。
+5. 保存すると、サーバー側でパッケージ/アイコンが `wwwroot/tools/` `wwwroot/icons/` に配置され、`manifest.json` に反映されます。一般利用者の画面では「更新を確認」を押すと新しいツールがすぐに一覧へ反映されます。バージョンを変更する場合は新しいパッケージファイルの選択が必須です（ファイルなしでのバージョン変更はエラーになります）。
 
 **注意**: 削除ダイアログで「いいえ」を選ぶと `manifest.json` からエントリを取り除くのみで、サーバー上のパッケージ/アイコンファイルは残ります（誤操作時の復旧をしやすくするための挙動）。「はい」を選ぶと同じIDの全バージョンのパッケージ/アイコンファイルも同時に削除します（二段階確認あり）。
 
@@ -138,7 +143,7 @@ dotnet run
 │   └── Asterism.Client.exe を配布・起動
 │
 └── 管理者PC（管理者のみ）
-    └── Asterism.Admin.exe を配布・起動（appsettings.json にServerBaseUrlを設定）
+    └── Asterism.Admin.exe を配布・起動（appsettings.json にServerBaseUrl・AdminApiKeyを設定）
 ```
 
 ### サーバーのセットアップ
@@ -156,7 +161,24 @@ dotnet publish -c Release -r win-x64 --self-contained -p:PublishSingleFile=true 
 
 **Visual Studioで発行する場合**: ソリューションエクスプローラーで `Asterism.Server` プロジェクトを右クリック→「発行」を選択すると、同梱の発行プロファイル（`Properties\PublishProfiles\FolderProfile.pubxml`）が自動的に読み込まれ、上記CLIコマンドと同じ設定（Release / win-x64 / self-contained / シングルファイル）で `publish\` フォルダ発行 が行えます。あとは「発行」ボタンを押すだけです。
 
-#### 2. 他PCからアクセスできるようにする（重要）
+#### 2. 管理者パスワードを設定する
+
+環境変数で設定するのが安全です（appsettings.json にコミットしない）。
+
+```powershell
+$env:Asterism__AdminApiKey = "強いパスワード"
+.\Asterism.Server.exe
+```
+
+または `appsettings.json` に直接記載する場合:
+
+```json
+{ "Asterism": { "AdminApiKey": "強いパスワード" } }
+```
+
+この値は `Asterism.Admin`（管理者アプリ）の appsettings.json に設定する `AdminApiKey` と一致させます。一致しない限り管理APIへのリクエストは401で拒否されるため、`Asterism.Admin` を配布していない第三者がAPIを直接叩いてもツールの登録・編集・削除はできません。
+
+#### 3. 他PCからアクセスできるようにする（重要）
 
 何も設定しないと、Kestrelは既定で `http://localhost:5000` のみをリッスンします。この状態だとサーバーPC自身からは動作確認できてしまいますが、**他のPC（クライアント）からは一切繋がりません**（クライアント側は「サーバーに繋がらずローカルキャッシュにフォールバックする」という分かりにくい形で症状が出ます）。
 
@@ -166,25 +188,36 @@ dotnet publish -c Release -r win-x64 --self-contained -p:PublishSingleFile=true 
 {
   "Logging": { "LogLevel": { "Default": "Information", "Microsoft.AspNetCore": "Warning" } },
   "AllowedHosts": "*",
+  "Asterism": { "AdminApiKey": "強いパスワード" },
   "Urls": "http://0.0.0.0:5000"
 }
 ```
 
 起動ログに `Now listening on: http://0.0.0.0:5000` と出ていればOKです。
 
-#### 3. Windowsサービスとして常時起動する（推奨）
+#### 4. Windowsサービスとして常時起動する（推奨）
 
 NSSM（Non-Sucking Service Manager）を使うのが簡単です。
 
 ```powershell
 nssm install Asterism "C:\Asterism\Asterism.Server.exe"
 nssm set Asterism AppDirectory "C:\Asterism"
+nssm set Asterism AppEnvironmentExtra "Asterism__AdminApiKey=強いパスワード"
 nssm start Asterism
 ```
 
 タスクスケジューラで「ログオン時に起動」にする方法でも構いません。
 
-#### 4. ファイアウォールを設定する
+**サービスを削除する場合**:
+
+```powershell
+nssm stop Asterism
+nssm remove Asterism confirm
+```
+
+`confirm` を付けないと削除の確認プロンプトが表示されます。サービス登録を消してもインストール先の `C:\Asterism` フォルダ（EXE・appsettings.json・wwwroot）は残るため、アンインストールとして完全に片付けたい場合はフォルダも別途削除してください。
+
+#### 5. ファイアウォールを設定する
 
 ```powershell
 netsh advfirewall firewall add rule name="Asterism" dir=in action=allow protocol=TCP localport=5000
@@ -235,17 +268,18 @@ dotnet publish -c Release -r win-x64 --self-contained -p:PublishSingleFile=true 
 
 #### 2. appsettings.json を設定する
 
-配布前に `publish\appsettings.json` の `ServerBaseUrl` を実際のサーバーIPまたはホスト名に書き換えます。
+配布前に `publish\appsettings.json` の `ServerBaseUrl` と `AdminApiKey`（サーバー側の値と一致させる）を書き換えます。
 
 ```json
 {
   "Asterism": {
-    "ServerBaseUrl": "http://192.168.1.100:5000/"
+    "ServerBaseUrl": "http://192.168.1.100:5000/",
+    "AdminApiKey": "強いパスワード"
   }
 }
 ```
 
-`Asterism.Admin` は起動すると認証なしにそのまま管理者画面を開きます。管理APIそのものにアプリ層の認証がないため（詳しくは「注意事項」を参照）、**`publish\` フォルダは管理者本人にのみ配布してください**。
+`Asterism.Admin` は起動時にこの値で自動認証し、入力画面なしでそのまま管理者画面を開きます。**そのため `publish\` フォルダは管理者本人にのみ配布してください**（クライアントと違い、appsettings.json自体に平文の管理者パスワードが入っています）。
 
 #### 3. 管理者に配布する
 
@@ -256,8 +290,8 @@ dotnet publish -c Release -r win-x64 --self-contained -p:PublishSingleFile=true 
 | 項目                       | 内容                                                                                                                                                                                                                              |
 | -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **通信**                   | 現状HTTPのみ。社内LAN内での利用のみを想定                                                                                                                                                                                          |
-| **他PCから繋がらない場合** | サーバー側の `appsettings.json` に `Urls: "http://0.0.0.0:5000"` の設定漏れ、またはファイアウォール未開放が原因のことが多い（「サーバーのセットアップ」手順2・4を参照）。クライアントは接続失敗時にローカルキャッシュへ静かにフォールバックするため、症状だけでは気づきにくい |
-| **管理API（`/api/admin/*`）の認証** | アプリ層の認証は行っていない。サーバーの `/api/admin/*` に到達できるネットワーク上の誰でも、`Asterism.Admin` を使わずとも直接HTTPリクエストでツールの登録・編集・削除が行える。ファイアウォール・VLAN等でサーバーへの到達性を信頼できる端末（管理者PC等）に絞ることを推奨する |
+| **他PCから繋がらない場合** | サーバー側の `appsettings.json` に `Urls: "http://0.0.0.0:5000"` の設定漏れ、またはファイアウォール未開放が原因のことが多い（「サーバーのセットアップ」手順3・5を参照）。クライアントは接続失敗時にローカルキャッシュへ静かにフォールバックするため、症状だけでは気づきにくい |
+| **管理者パスワード**       | `Asterism.Admin` の appsettings.json に平文で保存される（起動時に自動認証するため）。この配布物自体を管理者以外に渡さないこと。一般利用者向け `Asterism.Client` には管理機能・管理者パスワードを一切含めない                     |
 | **wwwrootのバックアップ**  | `wwwroot/` 以下（manifest.json・tools/・icons/）が全資産。定期的にバックアップしてください                                                                                                                                        |
 | **クライアントの自己更新** | ツールID `tool-asterism-client`（Zip型）をAsterismに登録し、クライアントEXE入りZIPを配布すると、管理者がバージョンを上げたときに一般ユーザーへ更新通知が届き、カードの「更新」ボタンでダウンロード→再起動の流れで自動適用できます。特別な実装は不要で、他のツールと全く同じ登録・更新フローに乗るだけです（`ToolCardViewModel`が`tool-asterism-client`というIDを特別扱いし、更新完了後に「再起動して適用しますか？」の確認→exeの上書き→再起動、を自動で行います） |
 | **サーバー自体の更新**     | クライアントのような自己更新の仕組みはありません。新しい `Asterism.Server.exe` に差し替えてWindowsサービスを再起動する、という手動運用を想定しています（多数のPCに配るクライアントと違い、サーバーは常時稼働のインフラ側1台なので自動化の必要性が薄いため）                                                        |
