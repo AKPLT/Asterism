@@ -6,7 +6,7 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="Themes/SolarizedDark.xaml"/>
+                <ResourceDictionary Source="Resources/ButtonStyles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
             <conv:StringToImageSourceConverter x:Key="StringToImageSourceConverter" />
             <conv:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
