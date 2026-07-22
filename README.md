@@ -88,7 +88,7 @@ dotnet run
 
 インストール先とインストール状態は以下に保存されます（管理者権限不要）。
 
-- ツール本体: `%USERPROFILE%\Downloads\Asterism\<tool-id>\`（クライアントのインストール先変更ボタンで変更可）
+- ツール本体: `%USERPROFILE%\Downloads\ToolPortal\<tool-id>\`（クライアントのインストール先変更ボタンで変更可）
 - インストール状態: `%LOCALAPPDATA%\Asterism\installed.json`
 - ユーザー設定（インストール先・お気に入り）: `%LOCALAPPDATA%\Asterism\user-settings.json`
 - manifestのオフラインキャッシュ: `%LOCALAPPDATA%\Asterism\manifest.cache.json`

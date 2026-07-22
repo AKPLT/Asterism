@@ -22,7 +22,7 @@ public sealed class LocalStateService : ILocalStateService
             ? dir
             : Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-                "Downloads", "Asterism");
+                "Downloads", "ToolPortal");
 
     public LocalStateService(IUserSettingsService userSettingsService)
     {

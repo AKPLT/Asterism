@@ -51,12 +51,12 @@ public partial class MainWindow : Window
             _trayIcon.Icon = System.Drawing.SystemIcons.Application;
         }
 
-        _trayIcon.Text = "Asterism";
+        _trayIcon.Text = "ToolPortal";
         _trayIcon.Visible = true;
         _trayIcon.DoubleClick += (_, _) => ShowWindow();
 
         var menu = new System.Windows.Forms.ContextMenuStrip();
-        menu.Items.Add("Asterism を開く", null, (_, _) => ShowWindow());
+        menu.Items.Add("ToolPortal を開く", null, (_, _) => ShowWindow());
         menu.Items.Add(new System.Windows.Forms.ToolStripSeparator());
         menu.Items.Add("終了", null, (_, _) => ExitApplication());
         _trayIcon.ContextMenuStrip = menu;
@@ -79,7 +79,7 @@ public partial class MainWindow : Window
 
     private void OnUpdatesDetected(int count)
     {
-        _trayIcon.BalloonTipTitle = "Asterism";
+        _trayIcon.BalloonTipTitle = "ToolPortal";
         _trayIcon.BalloonTipText = $"{count}件のツールに更新があります。";
         _trayIcon.BalloonTipIcon = System.Windows.Forms.ToolTipIcon.Info;
         _trayIcon.ShowBalloonTip(5000);
