@@ -1,4 +1,3 @@
-using System.Net.Http.Headers;
 using System.Windows;
 using Asterism.Admin.Options;
 using Asterism.Admin.Services;
@@ -30,7 +29,6 @@ public partial class App : Application
                     var options = sp.GetRequiredService<IOptions<AdminOptions>>().Value;
                     client.BaseAddress = new Uri(options.ServerBaseUrl);
                     client.Timeout = TimeSpan.FromMinutes(30);
-                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", options.AdminApiKey);
                 });
 
                 services.AddSingleton<IAdminApiService, AdminApiService>();
