@@ -47,6 +47,13 @@ dotnet run
 
 起動すると `client/Asterism.Client/appsettings.json` の `Asterism:ServerBaseUrl`（既定 `http://localhost:5000/`）からツール一覧を取得し、一覧表示します。
 
+### Visual Studioで実行・ビルドする
+
+`Asterism.sln` をVisual Studio 2022（.NET 8 SDKワークロード）で開くだけで、CLIと同様にビルド・実行できます。
+
+- **ビルド**: ソリューションエクスプローラーで「ソリューションのビルド」（既定ショートカット `Ctrl+Shift+B`）。
+- **実行**: 同梱の `Asterism.sln.slnLaunch` により、F5キーで **Asterism.Server と Asterism.Client が同時に起動**するよう複数スタートアッププロジェクトが設定済みです。個別に1つだけ実行したい場合はソリューションを右クリック→「スタートアッププロジェクトの設定」から変更してください。
+
 ## 使い方（デモ）
 
 同梱の `wwwroot/manifest.json` には7カテゴリ・19種類のデモツールが登録されています。
@@ -142,6 +149,8 @@ dotnet publish -c Release -r win-x64 --self-contained -p:PublishSingleFile=true 
 
 以前に `bin\` `obj\` `publish\` が残った状態で再度publishすると、中間キャッシュの影響で `publish\` の中に不要なフォルダが入れ子で残ることがあります。気になる場合は `bin\` `obj\` `publish\` を削除してから publish し直してください。
 
+**Visual Studioで発行する場合**: ソリューションエクスプローラーで `Asterism.Server` プロジェクトを右クリック→「発行」を選択すると、同梱の発行プロファイル（`Properties\PublishProfiles\FolderProfile.pubxml`）が自動的に読み込まれ、上記CLIコマンドと同じ設定（Release / win-x64 / self-contained / シングルファイル）で `publish\` フォルダ発行 が行えます。あとは「発行」ボタンを押すだけです。
+
 #### 2. 管理者パスワードを設定する
 
 環境変数で設定するのが安全です（appsettings.json にコミットしない）。
@@ -203,6 +212,8 @@ netsh advfirewall firewall add rule name="Asterism" dir=in action=allow protocol
 cd client\Asterism.Client
 dotnet publish -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o publish\
 ```
+
+**Visual Studioで発行する場合**: `Asterism.Client` プロジェクトを右クリック→「発行」で、同梱の発行プロファイル（`Properties\PublishProfiles\FolderProfile.pubxml`）が読み込まれ、同じ設定で `publish\` フォルダ発行が行えます。
 
 #### 2. appsettings.json をサーバーに向ける
 
