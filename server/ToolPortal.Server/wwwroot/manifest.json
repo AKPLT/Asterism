@@ -3,7 +3,7 @@
     {
       "id": "tool-db-converter",
       "name": "DB Converter",
-      "version": "1.1.1",
+      "version": "1.0.0",
       "description": "\u793E\u5185\u30C7\u30FC\u30BF\u30D9\u30FC\u30B9\u306E\u30D5\u30A9\u30FC\u30DE\u30C3\u30C8\u5909\u63DB\u30C4\u30FC\u30EB\u3002CSV\u30FBJSON\u30FBSQL\u5F62\u5F0F\u306B\u5BFE\u5FDC\u3002",
       "category": "\u30C7\u30FC\u30BF\u5909\u63DB",
       "tags": [
@@ -13,7 +13,7 @@
         "\u793E\u5185\u88FD"
       ],
       "iconUrl": "icons/db-converter.png",
-      "downloadUrl": "tools/db-converter-1.1.0.zip",
+      "downloadUrl": "tools/db-converter-1.0.0.zip",
       "packageType": "Zip",
       "executablePath": "DbConverter.exe",
       "isDisabled": false,
@@ -76,7 +76,7 @@
       "executablePath": "DbConverter.exe",
       "isDisabled": false,
       "createdAt": null,
-      "updatedAt": "2026-07-16T17:54:43.6155098+00:00"
+      "updatedAt": null
     },
     {
       "id": "tool-log-viewer",
@@ -347,7 +347,7 @@
       "executablePath": "DbConverter.exe",
       "isDisabled": false,
       "createdAt": null,
-      "updatedAt": "2026-07-16T18:16:27.9330167+00:00"
+      "updatedAt": null
     },
     {
       "id": "tool-process-monitor",

@@ -108,7 +108,10 @@ dotnet run
       "iconUrl": "icons/db-converter.png",
       "downloadUrl": "tools/db-converter-1.0.0.zip",
       "packageType": "Zip",
-      "executablePath": "DbConverter.exe"
+      "executablePath": "DbConverter.exe",
+      "isDisabled": false,
+      "createdAt": "2026-01-01T00:00:00+00:00",
+      "updatedAt": null
     }
   ]
 }
@@ -124,6 +127,8 @@ dotnet run
 | `iconUrl` / `downloadUrl` | string   | 絶対URL・相対パスどちらも可（相対時はサーバーのBaseAddressを基準に解決） |
 | `packageType`             | `"Zip"`  | 配布形式。zipを展開してインストールする                                 |
 | `executablePath`          | string   | 展開後フォルダからの相対パス（zip直下がフォルダ1つだけの場合は剥がされた後の相対パス） |
+| `isDisabled`              | boolean  | trueの場合、一般利用者の一覧から非表示になる（削除ではないため復元も容易。管理画面の「無効化」チェックボックスに対応） |
+| `createdAt` / `updatedAt` | string?  | 登録日時・最終更新日時（ISO 8601、UTC）。管理APIが自動設定する。手動編集時はnullで問題ない |
 
 ## 本番運用
 
