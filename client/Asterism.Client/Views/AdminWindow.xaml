@@ -4,11 +4,6 @@
         Title="管理者モード - ツール管理" Height="560" Width="900"
         AllowDrop="True" DragEnter="OnWindowDragEnter" Drop="OnWindowDrop">
     <DockPanel>
-    <Menu DockPanel.Dock="Top">
-        <MenuItem Header="ヘルプ">
-            <MenuItem Header="使い方（管理者）" Click="OnAdminHelpClick" />
-        </MenuItem>
-    </Menu>
     <Grid Margin="12">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />

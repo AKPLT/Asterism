@@ -89,12 +89,6 @@ public partial class AdminWindow : Window
         await _viewModel.DeleteCommand.ExecuteAsync(tool);
     }
 
-    private void OnAdminHelpClick(object sender, RoutedEventArgs e)
-    {
-        var win = new AdminHelpWindow { Owner = this };
-        win.Show();
-    }
-
     private GridViewColumnHeader? _lastSortHeader;
     private ListSortDirection _lastSortDir = ListSortDirection.Ascending;
 
